@@ -1,0 +1,7 @@
+<suite name="All Test Suite">
+    <test verbose="2" preserve-order="true" name="MobiLife Regrassion">
+        <classes>
+            <class name="com.mobilife.automation.RunTests"/>
+        </classes>
+    </test>
+</suite>
