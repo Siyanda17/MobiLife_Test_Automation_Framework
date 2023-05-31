@@ -5,6 +5,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+
+
+/**
+ * Represents the Automation Framework Configuration(Scans through the com.mobilife package
+ *
+ * @author Yakhuxolo Mxabo
+ * @version 1.0
+ * @deprecated This class is deprecated. Use the {@link ConfigurationProperties} class instead.
+ *
+ *
+ **/
+@Deprecated
 public class FrameworkProperties {
     private String result = "";
     private InputStream inputStream;
