@@ -46,6 +46,7 @@ public class StepDefinition {
 
     @Autowired
     ConfigurationProperties configurationProperties;
+    @SuppressWarnings({"Autowired"})
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
