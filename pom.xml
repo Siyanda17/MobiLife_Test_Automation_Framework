@@ -57,18 +57,21 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.13</version>
         </dependency>
-        <!--  https://mvnrepository.com/artifact/net.masterthought/maven-cucumber-reporting  -->
+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <dependency>
-            <groupId>net.masterthought</groupId>
-            <artifactId>maven-cucumber-reporting</artifactId>
-            <version>5.7.5</version>
-        </dependency>
-        <!--  https://mvnrepository.com/artifact/com.mysql/mysql-connector-j  -->
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
         </dependency>
+        <!-- To be implemented for Concise Reports -->
+        <!-- https://mvnrepository.com/artifact/tech.grasshopper/extentreports-cucumber7-adapter -->
+        <dependency>
+            <groupId>tech.grasshopper</groupId>
+            <artifactId>extentreports-cucumber7-adapter</artifactId>
+            <version>1.13.0</version>
+        </dependency>
+
+
         <!--  https://mvnrepository.com/artifact/org.slf4j/slf4j-api  -->
         <dependency>
             <groupId>org.slf4j</groupId>

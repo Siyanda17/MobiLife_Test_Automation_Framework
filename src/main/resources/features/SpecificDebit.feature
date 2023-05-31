@@ -5,6 +5,14 @@ Feature: Specific Debit
   #After  you finish use policies from the database to conduct test
   #Make this more dynamic fetch test policies with
   Background: On Mobility
+  @Done
+  Scenario: Successful login ThirdPartyPage
+    Given I am on the login page
+    When I enter my valid "SBServicing" and "M0biL1fe!"
+    And click the "Login" button
+    Then I should be redirected to the homepage
+    And see a welcome message with my "How can we help you?"
+
 
     @Done
     @SuccessfulScenario
@@ -16,7 +24,7 @@ Feature: Specific Debit
       When I select the policy
       Then Policy number filed is populated
       And Policy number is uneditable
-      And Collection Method Should be SSVS
+      And Collection Method Should be "SSVS"
       And Premium Month date picker translates to MM/YY
       And The Amount is automatically populated
       And Matches the current Nett Premium

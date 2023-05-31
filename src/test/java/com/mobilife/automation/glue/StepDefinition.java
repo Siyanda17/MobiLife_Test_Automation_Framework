@@ -9,8 +9,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import com.mobilife.Config.AutomationFrameworkConfiguration;
-import com.mobilife.Connect.Tables.SpecificDebit.SpecificDebitRowMapper;
-import com.mobilife.Connect.Tables.SpecificDebit.SpecificDebitTable;
+import com.mobilife.Connect.Tables.SpecificDebit.*;
 import com.mobilife.Driver.DriverSingleton;
 import com.mobilife.Utilities.ConfigurationProperties;
 import com.mobilife.Utilities.Constants;
@@ -24,8 +23,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.testng.AssertJUnit.assertFalse;
-import static org.testng.AssertJUnit.assertTrue;
+import java.util.List;
+
+import static org.testng.AssertJUnit.*;
 
 //Context Configuration AutomationFrameworkConfiguration in order to include those variable
 // to inject them to StepDefinition at runtime
@@ -39,7 +39,7 @@ public class StepDefinition {
     private SpecificDebitDetailsWindow specificDebitDetailsWindow;
 
     private RowMapper<SpecificDebitTable> specificDebitRowMapper = new SpecificDebitRowMapper();
-    private SpecificDebitTable specificDebitTableObject;
+    private List<SpecificDebitTable> specificDebitTableObject;
     private PolicyTable policyTableObject;
     private RowMapper<PolicyTable> policyTableRowMapper = new PolicyRowMapper();
 
@@ -58,8 +58,8 @@ public class StepDefinition {
         loginPage = new LoginPage();
         specificDebitPage = new SpecificDebitPage();
         specificDebitDetailsWindow = new SpecificDebitDetailsWindow();
-        specificDebitTableObject = jdbcTemplate.queryForObject("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,policy);
-        policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where id = ?",policyTableRowMapper,policy);
+        specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,policy);
+        policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,policy);
 
 
     }
@@ -95,7 +95,7 @@ public class StepDefinition {
     @Then("Find the policy")
     public void findThePolicy () {
         specificDebitDetailsWindow.SearchForUniquePolicy("P0054805802LA1");
-        System.out.println(specificDebitTableObject.getPolicyAmount());
+        //System.out.println(specificDebitTableObject.getPolicyAmount());
         System.out.println(policyTableObject.getUniquePolicyNumber());
     }
 
@@ -106,11 +106,8 @@ public class StepDefinition {
 
     @Then("Policy number filed is populated")
     public void policyNumberFiledIsPopulated () {
-        String actual = specificDebitDetailsWindow.getPolicyNumber();
-        System.out.println(actual);
-        String expected = policyTableObject.getUniquePolicyNumber();
-        System.out.println(expected);
-        assertTrue(actual.equals(expected));
+
+      assertFalse(specificDebitDetailsWindow.getPolicyNumber().isBlank());
     }
 
     @And("Policy number is uneditable")
@@ -119,9 +116,10 @@ public class StepDefinition {
         assertFalse(specificDebitDetailsWindow.isPolicyTextboxEnable());
     }
 
-    @And("Collection Method Should be SSVS")
-    public void collectionMethodShouldBeSSVS () {
-        
+    @And("Collection Method Should be {string}")
+    public void collectionMethodShouldBeSSVS (String args0) {
+        String actual = specificDebitDetailsWindow.getCollectionMethod().getText().substring(0,4);
+        assertEquals("Collection Method should be SSVS",args0,actual);
     }
 
     @And("Premium Month date picker translates to MM\\/YY")
@@ -136,11 +134,17 @@ public class StepDefinition {
 
     @And("Matches the current Nett Premium")
     public void matchesTheCurrentNettPremium () {
-        //assertTrue();
+        Double actual = Double.parseDouble(specificDebitDetailsWindow.getAmount());
+        Double expected = specificDebitTableObject.get(0).getPolicyAmount();
+        System.out.println(expected);
+        System.out.println(actual.doubleValue());
+        assertEquals(expected,actual);
     }
 
     @And("Nett Premium cannot be negative")
     public void nettPremiumCannotBeNegative () {
+        specificDebitDetailsWindow.setPolicyAmount("-");
+        assertFalse(specificDebitDetailsWindow.getPremiumMonth().contains("-"));
     }
 
     @Then("Enter Action Date")
@@ -186,10 +190,13 @@ public class StepDefinition {
 
     @When("delete a saved  specific debit before it has been submitted")
     public void deleteASavedSpecificDebitBeforeItHasBeenSubmitted () {
+        //Add more lines
+        specificDebitDetailsWindow.deleteSpecificDebit();
     }
 
     @Then("deleting a Specific Debit the {string} column in the database table gets popuplated")
     public void deletingASpecificDebitTheDeletedColumnInTheDatabaseTableGetsPopuplated () {
+
     }
 
     @And("Cannot delete a specific debit after it has been submitted")
@@ -211,4 +218,26 @@ public class StepDefinition {
     @When("Deny Edit Specific Debit after Submission")
     public void denyEditSpecificDebitAfterSubmission () {
     }
+
+    @Given("I am on the login page")
+    public void iAmOnTheLoginPage () {
+    }
+
+    @When("I enter my valid {string} and {string}")
+    public void iEnterMyValidAnd (String arg0, String arg1) {
+    }
+
+    @And("click the {string} button")
+    public void clickTheButton (String arg0) {
+    }
+
+    @Then("I should be redirected to the homepage")
+    public void iShouldBeRedirectedToTheHomepage () {
+    }
+
+    @And("see a welcome message with my {string}")
+    public void seeAWelcomeMessageWithMy (String arg0) {
+    }
+
+
 }

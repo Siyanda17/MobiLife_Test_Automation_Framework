@@ -10,6 +10,13 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 import java.sql.Connection;
 
+/**
+ * Represents the  Connector Configuration
+ *
+ * @author Yakhuxolo Mxabo
+ * @version 1.0
+ *
+ **/
 @Configuration
 public class Connector {
 
@@ -17,6 +24,11 @@ public class Connector {
 
     @Autowired
     ConfigurationProperties configurationProperties;
+    /**
+     * Creates a dataSource for policies_preprod for now
+     *
+     * @return dataSource
+     * */
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -30,6 +42,12 @@ public class Connector {
 
         return connection;
     }
+    /**
+     * Represents the JdbcTemplate
+     * @author Yakhuxolo Mxabo
+     * @version 1.0
+     *
+     **/
     @Bean
     public JdbcTemplate jdbcTemplate() {
         return new JdbcTemplate(dataSource());

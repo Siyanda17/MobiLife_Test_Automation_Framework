@@ -10,6 +10,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
 import java.io.IOException;
 import java.util.Properties;
 
+@Deprecated
 public class CaseSensitivePropertySourceFactory implements PropertySourceFactory {
     @Override
     public PropertySource<?> createPropertySource (String name, EncodedResource resource) throws IOException {

@@ -53,6 +53,14 @@ public class SpecificDebitDetailsWindow {
     @FindBy(id = "c21")
     private  WebElement collectionMethod;
 
+    public WebElement getCollectionMethod () {
+        return collectionMethod;
+    }
+//
+//    public void setCollectionMethod (WebElement collectionMethod) {
+//        this.collectionMethod = collectionMethod;
+//    }
+
     @FindBy(id ="c10")
     private WebElement actionDate;
     @FindBy(xpath = "//button[normalize-space()='Done']")
@@ -78,7 +86,12 @@ public class SpecificDebitDetailsWindow {
 
 
     }
-
+    /**
+     * Sets the Policy amount on the Specific Debit Page
+     * */
+    public void setPolicyAmount (String  policyAmount) {
+        this.policyAmount.sendKeys(policyAmount);
+    }
 
     /**
      * This method is required after policy search to press select
@@ -88,56 +101,34 @@ public class SpecificDebitDetailsWindow {
         selectPolicy.click();
     }
     /**
+     * Sets the premium month
      * Use three letter abbreviation for the months
+     * @param month to set the premium months
      * */
     public void ChoosePremiumMonth(String month){
-        driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS);
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.elementToBeClickable(premiumMonth));
         premiumMonth.click();
         Select date = new Select(driver.findElement(By.cssSelector(".ui-datepicker-month")));
         List<WebElement> allSelectedOptions = date.getAllSelectedOptions();
-        int index = 0;
-        switch (month){
-            case "Jan":
-                index = 0;
-                break;
-            case "Feb":
-                index = 1;
-                break;
-            case "Mar":
-                index = 2;
-                break;
-            case "Apr":
-                index = 3;
-                break;
-            case "May":
-                index = 4;
-                break;
-            case "Jun":
-                index = 5;
-                break;
-            case "Jul":
-                index = 6;
-                break;
-            case "Aug":
-                index = 7;
-                break;
-            case "Sep":
-                index = 8;
-                break;
-            case "Oct":
-                index = 9;
-                break;
-            case "Nov":
-                index = 10;
-                break;
-            case "Dec":
-                index = 11;
-                break;
-
-        }
+        int index = switch (month) {
+            case "Jan" -> 0;
+            case "Feb" -> 1;
+            case "Mar" -> 2;
+            case "Apr" -> 3;
+            case "May" -> 4;
+            case "Jun" -> 5;
+            case "Jul" -> 6;
+            case "Aug" -> 7;
+            case "Sep" -> 8;
+            case "Oct" -> 9;
+            case "Nov" -> 10;
+            case "Dec" -> 11;
+            default -> 0;
+        };
         date.selectByIndex(index);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.elementToBeClickable(premiumMonthDialogDoneBtn));
+        WebDriverWait wait2 = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait2.until(ExpectedConditions.elementToBeClickable(premiumMonthDialogDoneBtn));
        premiumMonthDialogDoneBtn.click();
     }
     /**
@@ -176,6 +167,8 @@ public class SpecificDebitDetailsWindow {
      * @return policyNumber.getAttribute("value") from policy number textbox
      * */
     public String getPolicyNumber(){
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOf(policyNumber));
         return policyNumber.getAttribute("value");
     }
     /**
