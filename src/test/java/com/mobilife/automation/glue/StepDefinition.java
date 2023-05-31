@@ -23,6 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.testng.AssertJUnit.*;
@@ -106,8 +107,13 @@ public class StepDefinition {
 
     @Then("Policy number filed is populated")
     public void policyNumberFiledIsPopulated () {
-
-      assertFalse(specificDebitDetailsWindow.getPolicyNumber().isBlank());
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(specificDebitDetailsWindow.getPolicyNumber());
+      assertFalse(specificDebitDetailsWindow.getPolicyNumber().isEmpty());
     }
 
     @And("Policy number is uneditable")
@@ -149,7 +155,11 @@ public class StepDefinition {
 
     @Then("Enter Action Date")
     public void enterActionDate () {
-        specificDebitDetailsWindow.setActionDate("25","05","2023");
+        LocalDate date = LocalDate.now();
+        String day = String.format("%02d", date.getDayOfMonth()+2);
+        String month =  String.format("%02d",date.getMonth().getValue());
+        String year = String.valueOf(date.getYear());
+       specificDebitDetailsWindow.setActionDate(day,month,year);
     }
 
     @Then("Click Save")

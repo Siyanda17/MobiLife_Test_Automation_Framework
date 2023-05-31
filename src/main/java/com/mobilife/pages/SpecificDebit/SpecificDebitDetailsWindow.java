@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  *
  **/
 public class SpecificDebitDetailsWindow {
-    private WebDriver driver;
+    private final WebDriver driver;
     public SpecificDebitDetailsWindow(){
         driver = DriverSingleton.getDriver();
         try {
@@ -41,7 +41,7 @@ public class SpecificDebitDetailsWindow {
     @FindBy(css = ".badge.badge-success.pull-right.item-badge")
     private WebElement selectPolicy;
 
-    @FindBy(id = "c20")
+    @FindBy(xpath = "//input[@id='c20']")
     private WebElement policyNumber;
 
     @FindBy(id = "c11")
@@ -80,7 +80,8 @@ public class SpecificDebitDetailsWindow {
 
     //Change method to return a Boolean for when we get result
     public void SearchForUniquePolicy(String policy){
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
+        wait.until(ExpectedConditions.visibilityOf(searchUniquePolicy));
         searchUniquePolicy.sendKeys(policy);
         findBtn.click();
 
@@ -97,7 +98,8 @@ public class SpecificDebitDetailsWindow {
      * This method is required after policy search to press select
      * */
     public void SelectPolicy(){
-        driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS);
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
+        wait.until(ExpectedConditions.elementToBeClickable(selectPolicy));
         selectPolicy.click();
     }
     /**
@@ -106,7 +108,7 @@ public class SpecificDebitDetailsWindow {
      * @param month to set the premium months
      * */
     public void ChoosePremiumMonth(String month){
-        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
         wait.until(ExpectedConditions.elementToBeClickable(premiumMonth));
         premiumMonth.click();
         Select date = new Select(driver.findElement(By.cssSelector(".ui-datepicker-month")));
@@ -127,7 +129,7 @@ public class SpecificDebitDetailsWindow {
             default -> 0;
         };
         date.selectByIndex(index);
-        WebDriverWait wait2 = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebDriverWait wait2 = new WebDriverWait(driver, Duration.ofSeconds(5L));
         wait2.until(ExpectedConditions.elementToBeClickable(premiumMonthDialogDoneBtn));
        premiumMonthDialogDoneBtn.click();
     }
@@ -152,13 +154,19 @@ public class SpecificDebitDetailsWindow {
 //            datepicker.sendKeys(date.format(DateTimeFormatter.ofPattern("dd-MMM-uuuu")));
 
     }
-   /**
+    /**
+     * Action date is in the form dd/mm/yyyy
+     * */
+
+
+    /**
     * Write notes on the notes textbox on the Specific Debit Window
     *
     * @param note the text for notes
     * */
     public void writeNotes(String note){
-        driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS);
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOf(notesBox));
         notesBox.sendKeys(note);
     }
     /**
@@ -223,7 +231,8 @@ public class SpecificDebitDetailsWindow {
      * Clicks Save button
      * */
     public void saveSpecificDebit(){
-        driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS);
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.elementToBeClickable(saveBtn));
         saveBtn.click();
     }
     /**

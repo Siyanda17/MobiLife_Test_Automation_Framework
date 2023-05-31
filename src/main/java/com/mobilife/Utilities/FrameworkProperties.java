@@ -12,7 +12,7 @@ import java.util.Properties;
  *
  * @author Yakhuxolo Mxabo
  * @version 1.0
- * @deprecated This class is deprecated. Use the {@link ConfigurationProperties} class instead.
+ * @deprecated This class is deprecated. Use the {ConfigurationProperties} class instead.
  *
  *
  **/

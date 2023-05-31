@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  *
  **/
 public class MainPage {
-    private WebDriver driver;
+    private final WebDriver driver;
 
     public MainPage(){
         driver = DriverSingleton.getDriver();
@@ -38,7 +38,7 @@ public class MainPage {
     * */
 
     public void ClickMyProfile(){
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5l));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5L));
         wait.until(ExpectedConditions.elementToBeClickable(myProfileSetting));
         myProfileSetting.click();
     }
@@ -51,7 +51,8 @@ public class MainPage {
     WebElement specificDebit ;
 
     public void GoToSpecificDebitPage(){
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+       WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
+       wait.until(ExpectedConditions.visibilityOf(policyManagement));
         policyManagement.click();
         specificDebit.click();
     }
