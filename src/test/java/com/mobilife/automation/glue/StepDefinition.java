@@ -3,6 +3,7 @@ package com.mobilife.automation.glue;
 import com.mobilife.Connect.Tables.Policy.PolicyRowMapper;
 import com.mobilife.Connect.Tables.Policy.PolicyTable;
 import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -17,16 +18,26 @@ import com.mobilife.pages.LoginPage.LoginPage;
 import com.mobilife.pages.MainPage.MainPage;
 import com.mobilife.pages.SpecificDebit.SpecificDebitDetailsWindow;
 import com.mobilife.pages.SpecificDebit.SpecificDebitPage;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
-import static org.testng.AssertJUnit.*;
+import static java.lang.System.out;
+import static java.lang.Thread.sleep;
+import static junit.framework.TestCase.*;
+
 
 //Context Configuration AutomationFrameworkConfiguration in order to include those variable
 // to inject them to StepDefinition at runtime
@@ -34,6 +45,7 @@ import static org.testng.AssertJUnit.*;
 @ContextConfiguration(classes = AutomationFrameworkConfiguration.class)
 public class StepDefinition {
     private WebDriver driver;
+    private String scenarioName;
     private MainPage  mainPage;
     private LoginPage loginPage;
     private SpecificDebitPage specificDebitPage;
@@ -65,7 +77,13 @@ public class StepDefinition {
 
 
     }
-
+    /**
+     * Set up for the different scenarios
+     * */
+    @Before
+    public void setUp(Scenario scenario){
+        scenarioName = scenario.getName();
+    }
     @Given("I am on Specific Debit Tab")
     public void i_am_on_specific_debit_tab(){
 
@@ -114,7 +132,7 @@ public class StepDefinition {
             e.printStackTrace();
         }
         System.out.println(specificDebitDetailsWindow.getPolicyNumber());
-      assertFalse(specificDebitDetailsWindow.getPolicyNumber().isEmpty());
+      assertFalse(specificDebitDetailsWindow.getPolicyNumber().getAttribute("value").isEmpty());
     }
 
     @And("Policy number is uneditable")
@@ -143,15 +161,13 @@ public class StepDefinition {
     public void matchesTheCurrentNettPremium () {
         Double actual = Double.parseDouble(specificDebitDetailsWindow.getAmount());
         Double expected = specificDebitTableObject.get(0).getPolicyAmount();
-        System.out.println(expected);
-        System.out.println(actual.doubleValue());
         assertEquals(expected,actual);
     }
 
     @And("Nett Premium cannot be negative")
     public void nettPremiumCannotBeNegative () {
         specificDebitDetailsWindow.setPolicyAmount("-");
-        assertFalse(specificDebitDetailsWindow.getPremiumMonth().contains("-"));
+        assertFalse(specificDebitDetailsWindow.getPremiumMonth().getAttribute("value").contains("-"));
     }
 
     @Then("Enter Action Date")
@@ -165,28 +181,78 @@ public class StepDefinition {
 
     @Then("Click Save")
     public void clickSave () {
-       specificDebitDetailsWindow.saveSpecificDebit();
+
+
+
+
+        specificDebitDetailsWindow.saveSpecificDebit();
+        if(specificDebitDetailsWindow.getDuplicatePopUp().isDisplayed()){
+            WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(5L));
+            wait.until(ExpectedConditions.elementToBeClickable(specificDebitDetailsWindow.getDuplicatePopUpBtn()));
+            specificDebitDetailsWindow.getDuplicatePopUpBtn().click();
+        }
     }
 
     @And("If it's after {string} Mobility will show an error text")
     public void ifItSAfterMobilityWillShowAnErrorText (String arg0) {
+        LocalTime cutOffTime = LocalTime.of(Integer.parseInt(arg0.substring(0,1)), Integer.parseInt(arg0.substring(3,4)));
+        out.println(arg0.substring(0,2)+arg0.substring(3,5));
+        //If Ran after 14:30 catch the error label
+        if(LocalTime.now().isAfter(cutOffTime)){//Get the Error Text
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(10000));
+            wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getErrorTextUnderActionDate()));
+            String actualText = specificDebitDetailsWindow.getErrorTextUnderActionDate().getText();
+            assertTrue("Error text",specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());}
+
     }
 
     @And("If it's Duplicate for the same month get pop up")
     public void ifItSDuplicateForTheSameMonthGetPopUp () {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(15000));
+        wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getDuplicatePopUp()));
+        //Fix logic
+        try {
+            assertNotNull(specificDebitDetailsWindow.getDuplicatePopUp());
+        }catch (NullPointerException e){
+            out.println("No Duplicate");
+        }
     }
 
     @Then("Error message will show below the empty textboxes")
     public void errorMessageWillShowBelowTheEmptyTextboxes () {
+        if(specificDebitDetailsWindow.getPremiumMonth().getText().isEmpty()){
+            WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
+            wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getErrorTextUnderPremiumMonth()));
+            assertTrue(specificDebitDetailsWindow.getErrorTextUnderPremiumMonth().isDisplayed());
+        }
+
+        if(specificDebitDetailsWindow.getActionDate().getText().isEmpty()){
+            WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
+            wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getErrorTextUnderActionDate()));
+            assertTrue(specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());
+        }
     }
 
     @When("Submitted checkbox empty\\(no tick) before the linked collection item is Submitted")
     public void submittedCheckboxEmptyNoTickBeforeTheLinkedCollectionItemIsSubmitted () {
+
+
+        // Get the value of a specific CSS property for the ::before pseudo-element
+        //String beforeContent = element.getCssValue("content");
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        String contentValue = (String) js.executeScript("return window.getComputedStyle(arguments[0], '::before').getPropertyValue('content');", specificDebitDetailsWindow.getSubmittedCheckbox());
+        char submit = contentValue.charAt(0);
+//        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
+//        wait.until(ExpectedConditions.elementToBeClickable(specificDebitDetailsWindow.getPolicyNumber()));
+        out.println(submit);
+        out.println(contentValue);
+        //Check if value from contentValue is the desired
+
     }
 
     @And("Cannot tick Submitted checkbox")
     public void cannotTickSubmittedCheckbox () {
-
+       assertFalse(specificDebitDetailsWindow.getSubmittedBtn().isEnabled());
     }
 
     @And("Can add notes")
@@ -234,8 +300,8 @@ public class StepDefinition {
     public void iAmOnTheLoginPage () {
     }
 
-    @When("I enter my valid {string} and {string}")
-    public void iEnterMyValidAnd (String arg0, String arg1) {
+    @When("I enter my valid username and password")
+    public void iEnterMyValidAnd () {
     }
 
     @And("click the {string} button")
