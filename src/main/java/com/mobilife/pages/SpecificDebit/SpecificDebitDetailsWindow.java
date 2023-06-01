@@ -14,6 +14,8 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static org.openqa.selenium.support.PageFactory.initElements;
+
 
 /**
  * Represents the Specific Debit Details Window
@@ -26,12 +28,7 @@ public class SpecificDebitDetailsWindow {
     private final WebDriver driver;
     public SpecificDebitDetailsWindow(){
         driver = DriverSingleton.getDriver();
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        PageFactory.initElements(driver, this);
+        initElements(driver, this);
     }
     //Specific Debit Details window
     @FindBy(id = "c18")
@@ -53,6 +50,18 @@ public class SpecificDebitDetailsWindow {
     @FindBy(id = "c21")
     private  WebElement collectionMethod;
 
+    @FindBy(id = "c10_validationLabel")
+    private WebElement errorTextUnderActionDate;
+
+    @FindBy(id = "c11_validationLabel")
+    private WebElement errorTextUnderPremiumMonth;
+
+    @FindBy(css = ".swal2-popup.swal2-modal.swal2-show")
+    private WebElement duplicatePopUp;
+
+    @FindBy(css = "button[class='swal2-confirm btn btn-primary']")
+    private WebElement duplicatePopUpBtn;
+
     public WebElement getCollectionMethod () {
         return collectionMethod;
     }
@@ -68,6 +77,12 @@ public class SpecificDebitDetailsWindow {
 
     @FindBy(id = "c12")
     private WebElement policyAmount;
+
+    @FindBy(id = "c13")
+    private WebElement submittedBtn;
+
+    @FindBy(css = ".fa.fa-square-o")
+    private WebElement submittedCheckbox;
 
     @FindBy(id = "c14")
     private WebElement notesBox;
@@ -126,7 +141,7 @@ public class SpecificDebitDetailsWindow {
             case "Oct" -> 9;
             case "Nov" -> 10;
             case "Dec" -> 11;
-            default -> 0;
+            default -> -1;
         };
         date.selectByIndex(index);
         WebDriverWait wait2 = new WebDriverWait(driver, Duration.ofSeconds(5L));
@@ -141,7 +156,7 @@ public class SpecificDebitDetailsWindow {
         //WebElement datepicker;
         /*
          * Cases that are not For Testing the Action Date*/
-        actionDate.sendKeys(day+"/"+month+"/"+year);
+        actionDate.sendKeys(day+"-"+month+"-"+year);
         actionDateDoneBtn.click();
 //           // datepicker = driver.findElement(By.xpath("//input[@id='c10']"));
 //
@@ -154,9 +169,7 @@ public class SpecificDebitDetailsWindow {
 //            datepicker.sendKeys(date.format(DateTimeFormatter.ofPattern("dd-MMM-uuuu")));
 
     }
-    /**
-     * Action date is in the form dd/mm/yyyy
-     * */
+
 
 
     /**
@@ -165,7 +178,7 @@ public class SpecificDebitDetailsWindow {
     * @param note the text for notes
     * */
     public void writeNotes(String note){
-        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
         wait.until(ExpectedConditions.visibilityOf(notesBox));
         notesBox.sendKeys(note);
     }
@@ -174,10 +187,10 @@ public class SpecificDebitDetailsWindow {
      *
      * @return policyNumber.getAttribute("value") from policy number textbox
      * */
-    public String getPolicyNumber(){
-        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+    public WebElement getPolicyNumber(){
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
         wait.until(ExpectedConditions.visibilityOf(policyNumber));
-        return policyNumber.getAttribute("value");
+        return policyNumber;
     }
     /**
      * Gets the nett premium from the Specific Debit window
@@ -194,8 +207,8 @@ public class SpecificDebitDetailsWindow {
      * @return premiumMonth.getAttribute("value") from premium month textbox
      *
      * */
-    public String getPremiumMonth(){
-        return premiumMonth.getAttribute("value");
+    public WebElement getPremiumMonth(){
+        return premiumMonth;
     }
     /**
      * Gets the Action Date from the Specific Debit window
@@ -203,8 +216,8 @@ public class SpecificDebitDetailsWindow {
      * @return actionDate.getAttribute("value") from Action Date textbox
      *
      * */
-    public String getActionDate(){
-        return  actionDate.getAttribute("value");
+    public WebElement getActionDate(){
+        return  actionDate;
     }
 
     /**
@@ -214,14 +227,39 @@ public class SpecificDebitDetailsWindow {
      *
      * not sure if it works
      * */
-    public String getNotes(){
-        return notesBox.getText();
+    public WebElement getNotes(){
+        return notesBox;
     }
+
+    public WebElement getDuplicatePopUp () {
+        return duplicatePopUp;
+    }
+
+    public WebElement getDuplicatePopUpBtn () {
+        return duplicatePopUpBtn;
+    }
+
+    public WebElement getErrorTextUnderPremiumMonth () {
+        return errorTextUnderPremiumMonth;
+    }
+
+    public WebElement getErrorTextUnderActionDate () {
+        return errorTextUnderActionDate;
+    }
+
+    public WebElement getSubmittedBtn () {
+        return submittedBtn;
+    }
+
+    public WebElement getSubmittedCheckbox () {
+        return submittedCheckbox;
+    }
+
     /**
      * Deletes a Specific Debit
      * */
     public void deleteSpecificDebit(){
-        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
         wait.until(ExpectedConditions.elementToBeClickable(deleteBtn));
         deleteBtn.click();
     }
