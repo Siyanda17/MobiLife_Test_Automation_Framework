@@ -6,9 +6,9 @@ Feature: Specific Debit
   #Make this more dynamic fetch test policies with
   Background: On Mobility
   @Done
-  Scenario: Successful login ThirdPartyPage
+  Scenario: Successful login
     Given I am on the login page
-    When I enter my valid "SBServicing" and "M0biL1fe!"
+    When I enter my valid username and password
     And click the "Login" button
     Then I should be redirected to the homepage
     And see a welcome message with my "How can we help you?"
