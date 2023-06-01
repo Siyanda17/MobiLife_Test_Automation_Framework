@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 @RunWith(Cucumber.class)
 @CucumberOptions(
         features = "src/main/resources/features",
+        tags = "@Done",
         plugin = {"pretty","html:target/cucumber-html-report.html"},
         objectFactory = io.cucumber.spring.SpringFactory.class
 
