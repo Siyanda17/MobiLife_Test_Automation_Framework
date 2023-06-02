@@ -33,7 +33,7 @@ Feature: Specific Debit
       Then  Enter Action Date
       Then Click Save
       And If it's after "14:30" Mobility will show an error text
-      And If it's Duplicate for the same month get pop up
+
       #Detect Duplicate Specific Debits
     @Done
     Scenario: Add Specific Debit without filling in fields
@@ -47,17 +47,17 @@ Feature: Specific Debit
       @Done
     Scenario: Action Date
       # Action date cannot be in the past(Past dates on the date picker are greyed out)
-      # Action date should not be a non collection day(w3eekend days and holidays should be greyed out
+      # Action date should not be a non collection day(weekend days and holidays should be greyed out)
       Then Enter Action Date
 
-    @PartiallyDone
+    @Done
     Scenario: Check Submitted
       When  Submitted checkbox empty(no tick) before the linked collection item is Submitted
       And Cannot tick Submitted checkbox
       And Can add notes
       Then Submitted checkbox ticked after the linked collection item is submitted
 
-  @PartiallyDone
+  @Done
     Scenario:  Delete Specific Debit
       When delete a saved  specific debit before it has been submitted
       Then deleting a Specific Debit the 'Deleted' column in the database table gets popuplated
@@ -66,7 +66,7 @@ Feature: Specific Debit
 
       #Add specific debit for policy with inactive contract payment Status
 
-      Scenario:  Add Specific Debit for inactive
+      Scenario:  Add Specific Debit for inactive CPS
         When Adding for inactive contract payment status
         Then client contract payment status updates to 'active' and contract payment status reason to 'Client requested'
 

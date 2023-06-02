@@ -1,7 +1,9 @@
 package com.mobilife.automation.glue;
 
+import com.aventstack.extentreports.ExtentReports;
 import com.mobilife.Connect.Tables.Policy.PolicyRowMapper;
 import com.mobilife.Connect.Tables.Policy.PolicyTable;
+import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import io.cucumber.java.en.And;
@@ -18,10 +20,7 @@ import com.mobilife.pages.LoginPage.LoginPage;
 import com.mobilife.pages.MainPage.MainPage;
 import com.mobilife.pages.SpecificDebit.SpecificDebitDetailsWindow;
 import com.mobilife.pages.SpecificDebit.SpecificDebitPage;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static java.lang.System.out;
@@ -44,25 +44,28 @@ import static junit.framework.TestCase.*;
 @CucumberContextConfiguration
 @ContextConfiguration(classes = AutomationFrameworkConfiguration.class)
 public class StepDefinition {
-    private WebDriver driver;
+    private  WebDriver driver;
     private String scenarioName;
     private MainPage  mainPage;
     private LoginPage loginPage;
     private SpecificDebitPage specificDebitPage;
     private SpecificDebitDetailsWindow specificDebitDetailsWindow;
 
-    private RowMapper<SpecificDebitTable> specificDebitRowMapper = new SpecificDebitRowMapper();
+    private final RowMapper<SpecificDebitTable> specificDebitRowMapper = new SpecificDebitRowMapper();
     private List<SpecificDebitTable> specificDebitTableObject;
     private PolicyTable policyTableObject;
-    private RowMapper<PolicyTable> policyTableRowMapper = new PolicyRowMapper();
+    private final RowMapper<PolicyTable> policyTableRowMapper = new PolicyRowMapper();
 
     @Autowired
     ConfigurationProperties configurationProperties;
-    @SuppressWarnings({"jdbcTemplate","jdbcTemplatePolicy"})
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private  JdbcTemplate jdbcTemplatePolicy;
+
+    public StepDefinition () {
+    }
 
     @Before
     public void initializeObjects(){
@@ -83,6 +86,22 @@ public class StepDefinition {
     @Before
     public void setUp(Scenario scenario){
         scenarioName = scenario.getName();
+
+        if (scenarioName.equals("Delete Specific Debit")) {
+            specificDebitDetailsWindow.getCancelBtn().click();
+            try {
+                Thread.sleep(3_500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            specificDebitPage.searchSpecificDebit("P0054805802LA1");
+            try {
+                Thread.sleep(3_500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            specificDebitPage.getLatestSpecificDebit();
+        }
     }
     @Given("I am on Specific Debit Tab")
     public void i_am_on_specific_debit_tab(){
@@ -172,11 +191,18 @@ public class StepDefinition {
 
     @Then("Enter Action Date")
     public void enterActionDate () {
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         LocalDate date = LocalDate.now();
-        String day = String.format("%02d", date.getDayOfMonth()+2);
+        String day = String.format("%02d", date.getDayOfMonth()+4);
         String month =  String.format("%02d",date.getMonth().getValue());
         String year = String.valueOf(date.getYear());
        specificDebitDetailsWindow.setActionDate(day,month,year);
+       assertFalse(specificDebitDetailsWindow.isThereASubmittedCheckMark());
     }
 
     @Then("Click Save")
@@ -186,10 +212,17 @@ public class StepDefinition {
 
 
         specificDebitDetailsWindow.saveSpecificDebit();
-        if(specificDebitDetailsWindow.getDuplicatePopUp().isDisplayed()){
-            WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(5L));
+
+        if(!scenarioName.equals("Add Specific Debit without filling in fields")){
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5L));
             wait.until(ExpectedConditions.elementToBeClickable(specificDebitDetailsWindow.getDuplicatePopUpBtn()));
-            specificDebitDetailsWindow.getDuplicatePopUpBtn().click();
+            // Execute JavaScript code to click the button
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("document.querySelector(\"body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div > div.swal2-header > button\").click();");
+
+            // specificDebitDetailsWindow.getDuplicatePopUpBtn().click();
+            assertFalse(specificDebitDetailsWindow.isDuplicate());
         }
     }
 
@@ -197,8 +230,14 @@ public class StepDefinition {
     public void ifItSAfterMobilityWillShowAnErrorText (String arg0) {
         LocalTime cutOffTime = LocalTime.of(Integer.parseInt(arg0.substring(0,1)), Integer.parseInt(arg0.substring(3,4)));
         out.println(arg0.substring(0,2)+arg0.substring(3,5));
+        String inputDate = specificDebitDetailsWindow.
+                getActionDate().
+                getAttribute("value");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate date = LocalDate.parse(inputDate, formatter);
         //If Ran after 14:30 catch the error label
-        if(LocalTime.now().isAfter(cutOffTime)){//Get the Error Text
+        if(LocalTime.now().isAfter(cutOffTime) &&
+                        date.equals(LocalDate.now())){//Get the Error Text
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(10000));
             wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getErrorTextUnderActionDate()));
             String actualText = specificDebitDetailsWindow.getErrorTextUnderActionDate().getText();
@@ -208,44 +247,36 @@ public class StepDefinition {
 
     @And("If it's Duplicate for the same month get pop up")
     public void ifItSDuplicateForTheSameMonthGetPopUp () {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(15000));
-        wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getDuplicatePopUp()));
-        //Fix logic
-        try {
-            assertNotNull(specificDebitDetailsWindow.getDuplicatePopUp());
-        }catch (NullPointerException e){
-            out.println("No Duplicate");
-        }
+
+        specificDebitDetailsWindow.ChoosePremiumMonth("Mar");
+         assertTrue("A pop up should appear",specificDebitDetailsWindow.isDuplicate());
+
     }
 
     @Then("Error message will show below the empty textboxes")
     public void errorMessageWillShowBelowTheEmptyTextboxes () {
         if(specificDebitDetailsWindow.getPremiumMonth().getText().isEmpty()){
-            WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
-            wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getErrorTextUnderPremiumMonth()));
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             assertTrue(specificDebitDetailsWindow.getErrorTextUnderPremiumMonth().isDisplayed());
         }
 
         if(specificDebitDetailsWindow.getActionDate().getText().isEmpty()){
-            WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
-            wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getErrorTextUnderActionDate()));
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             assertTrue(specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());
         }
     }
 
     @When("Submitted checkbox empty\\(no tick) before the linked collection item is Submitted")
     public void submittedCheckboxEmptyNoTickBeforeTheLinkedCollectionItemIsSubmitted () {
-
-
-        // Get the value of a specific CSS property for the ::before pseudo-element
-        //String beforeContent = element.getCssValue("content");
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        String contentValue = (String) js.executeScript("return window.getComputedStyle(arguments[0], '::before').getPropertyValue('content');", specificDebitDetailsWindow.getSubmittedCheckbox());
-        char submit = contentValue.charAt(0);
-//        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
-//        wait.until(ExpectedConditions.elementToBeClickable(specificDebitDetailsWindow.getPolicyNumber()));
-        out.println(submit);
-        out.println(contentValue);
+        assertFalse(specificDebitDetailsWindow.isThereASubmittedCheckMark());
         //Check if value from contentValue is the desired
 
     }
@@ -258,6 +289,8 @@ public class StepDefinition {
     @And("Can add notes")
     public void canAddNotes () {
         specificDebitDetailsWindow.writeNotes("Help i am trapped in a Specific Debit");
+        //To be Modified
+        //specificDebitDetailsWindow.getCancelBtn();
     }
 
     @Then("Submitted checkbox ticked after the linked collection item is submitted")
@@ -268,16 +301,24 @@ public class StepDefinition {
     @When("delete a saved  specific debit before it has been submitted")
     public void deleteASavedSpecificDebitBeforeItHasBeenSubmitted () {
         //Add more lines
+
         specificDebitDetailsWindow.deleteSpecificDebit();
     }
 
     @Then("deleting a Specific Debit the {string} column in the database table gets popuplated")
     public void deletingASpecificDebitTheDeletedColumnInTheDatabaseTableGetsPopuplated () {
-
+       SpecificDebitTable deletedSpecific = specificDebitTableObject.get(specificDebitTableObject.size()-1);
+        assertEquals(1, deletedSpecific.getDeleted());
     }
 
     @And("Cannot delete a specific debit after it has been submitted")
     public void cannotDeleteASpecificDebitAfterItHasBeenSubmitted () {
+        String policy = specificDebitPage.getSubmittedPolicies()
+                .get(0)
+                .findElement(By.cssSelector("table > tbody > tr:nth-child(1) > td:nth-child(2)"))
+                .getText();
+        out.println(policy);
+        specificDebitPage.searchSpecificDebit(policy);
     }
 
     @When("Adding for inactive contract payment status")
@@ -314,6 +355,17 @@ public class StepDefinition {
 
     @And("see a welcome message with my {string}")
     public void seeAWelcomeMessageWithMy (String arg0) {
+    }
+    @After
+    public void  cleanUpScenario(){
+        if(scenarioName.equals("Add Specific Debit")){
+            if(specificDebitDetailsWindow.getSpecificDebitDetailsWindow().isDisplayed()){
+                WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(5L));
+                wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getCancelBtn()));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", specificDebitDetailsWindow.getCancelBtn());
+
+            }
+        }
     }
 
 

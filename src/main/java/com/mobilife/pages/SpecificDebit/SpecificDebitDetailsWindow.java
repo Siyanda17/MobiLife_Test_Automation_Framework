@@ -1,9 +1,7 @@
 package com.mobilife.pages.SpecificDebit;
 
 import com.mobilife.Driver.DriverSingleton;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -26,10 +24,15 @@ import static org.openqa.selenium.support.PageFactory.initElements;
  **/
 public class SpecificDebitDetailsWindow {
     private final WebDriver driver;
+
+
+
     public SpecificDebitDetailsWindow(){
         driver = DriverSingleton.getDriver();
         initElements(driver, this);
     }
+    @FindBy(css = "div[id='SpecificDebitModal'] div[class='modal-content']")
+    private WebElement specificDebitDetailsWindow;
     //Specific Debit Details window
     @FindBy(id = "c18")
     private WebElement searchUniquePolicy;
@@ -56,7 +59,7 @@ public class SpecificDebitDetailsWindow {
     @FindBy(id = "c11_validationLabel")
     private WebElement errorTextUnderPremiumMonth;
 
-    @FindBy(css = ".swal2-popup.swal2-modal.swal2-show")
+    @FindBy(xpath = "//div[@class='swal2-popup swal2-modal swal2-show']")
     private WebElement duplicatePopUp;
 
     @FindBy(css = "button[class='swal2-confirm btn btn-primary']")
@@ -81,7 +84,7 @@ public class SpecificDebitDetailsWindow {
     @FindBy(id = "c13")
     private WebElement submittedBtn;
 
-    @FindBy(css = ".fa.fa-square-o")
+    @FindBy(css = "#c13 > i")
     private WebElement submittedCheckbox;
 
     @FindBy(id = "c14")
@@ -92,6 +95,9 @@ public class SpecificDebitDetailsWindow {
 
     @FindBy(id = "c23")
     private WebElement deleteBtn;
+
+    @FindBy(xpath = "//button[@type='button'][normalize-space()='Cancel']")
+    private WebElement cancelBtn;
 
     //Change method to return a Boolean for when we get result
     public void SearchForUniquePolicy(String policy){
@@ -273,6 +279,18 @@ public class SpecificDebitDetailsWindow {
         wait.until(ExpectedConditions.elementToBeClickable(saveBtn));
         saveBtn.click();
     }
+    public Boolean isDuplicate(){
+        boolean isDuplicate = false;
+        try {
+            driver.switchTo().alert();
+            isDuplicate = true;
+        }catch (NoAlertPresentException e){
+            isDuplicate = false;
+        }
+
+
+        return isDuplicate;
+    }
     /**
      * Checks if policy Textbox is enabled
      *
@@ -280,6 +298,20 @@ public class SpecificDebitDetailsWindow {
      * */
     public Boolean isPolicyTextboxEnable(){
         return policyNumber.isEnabled();
+    }
+
+    public WebElement getSpecificDebitDetailsWindow () {
+        return specificDebitDetailsWindow;
+    }
+
+    public WebElement getCancelBtn () {
+        return cancelBtn;
+    }
+    public Boolean isThereASubmittedCheckMark(){
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        String script = "return window.getComputedStyle(arguments[0], '::before').content;";
+        String contentValue = (String) js.executeScript(script, submittedCheckbox);
+        return contentValue.equals("\\f046");
     }
 
 }

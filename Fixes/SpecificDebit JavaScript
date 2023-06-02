@@ -1,0 +1,123 @@
+<script>
+    $('.positive').mask('999999999.99');
+    let nonDebitDays = [];
+    function setNonDebitDays(arr = []) {
+        nonDebitDays = arr;
+    }
+    function populatePolicyList(data) {
+        let searchResultRow = $("#policy_search_result");
+        searchResultRow.html("");
+        let listItems = ``;
+        data.forEach(item => {
+            listItems += `<a id="${item.Id}" href="#" class="list-group-item search-result-item">
+                            <span>${item.UniquePolicyNumber}</span>
+                            <span class="text-center" style="margin-left: 2em;">[${item.FirstName}]</span>
+                            <span class="badge badge-success pull-right item-badge">Select</span>
+                          </a>`;
+        });
+        let html = `<div class="col-md-12 ">
+                        <div class="list-group">${listItems}</div>
+                    </div>`;
+        searchResultRow.html(html);
+    }
+    $(document).on("click",".search-result-item", function (event) {
+        event.preventDefault();
+        let listItem = $(this);
+        $(".search-details").show();
+        $(".search-result-item").removeClass("list-group-item-success");
+        listItem.addClass("list-group-item-success");
+        $(".item-badge").text("Select");
+        listItem.find(".item-badge").text("Selected");
+        $(".item-details").show();
+        qc.pA('SpecificDebit_OverviewForm','populateDetail', 'QClickEvent', listItem.attr("id"));
+    });
+    function resetActionDatePicker() {
+        $('.action-date-control').datepicker( {
+            showButtonPanel: true,
+            dateFormat: "dd-M-yy",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "1900:2200",
+            minDate: new Date(),
+            beforeShowDay: function(date) {
+	            let day = date.getDay();
+	            if (day == 0 || day == 6) {
+		            return [false];
+	            }
+	            let str = jQuery.datepicker.formatDate('yy-mm-dd', date);
+	            if (nonDebitDays.indexOf(str) != -1) {
+		            return [false];
+	            }
+	            return [true];
+            },
+            beforeShow: function(input) {
+                $(".action-date-control").datepicker("widget").removeClass('hide-calendar');
+            }
+        });
+    }
+    $('#SpecificDebitModal').on('shown.bs.modal', function (e) {
+        resetPremiumMonthDatePicker();
+        resetActionDatePicker();
+    });
+    function resetPremiumMonthDatePicker() {
+        $('.premiumMonth').datepicker( {
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            dateFormat: 'mm/y',
+            beforeShow: function(input) {
+                $('.premiumMonth').datepicker("widget").addClass('hide-calendar');
+            },
+            onChangeMonthYear: function () {
+                let month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                let year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                $(this).datepicker('setDate', new Date(year, month, 1));
+            },
+            onClose: function(dateText, inst) {
+                let month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                let year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                $(this).datepicker('setDate', new Date(year, month, 1));
+                $('.premiumMonth').datepicker("widget").removeClass('hide-calendar');
+            }
+        });
+    }
+
+    let dataToExport = [];
+    function exportObjectToCSV(data, fileName = "failed_import") {
+        if (data.length > 0) {
+            showAjaxOverlay();
+            let headerEntries = Object.keys(data[0]);
+            let bodyEntries = data.map(d => headerEntries.map(h => d[h]).join(","));
+            let csvContent = `data:text/csv;charset=utf-8,${headerEntries.join(",")}\n${bodyEntries.join("\n")}`;
+            const encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${fileName}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            removeAjaxOverlay();
+        }
+    }
+    function resetImportData(data) {
+        dataToExport = data;
+    }
+    $(document).on("click", "#error_details", function (event) {
+        event.stopImmediatePropagation();
+        let fileName = `failed_import_${Date.now()}`;
+        exportObjectToCSV(dataToExport, fileName);
+    });
+
+    function showSpecificDebitDuplicatePopUp() {
+        let sweetAlertObj = swal({
+            html: "",
+            type: "error",
+            title: "Duplicate debits not allowed",
+            confirmButtonText: "Got It!",
+            confirmButtonClass : "btn btn-primary",
+            buttonsStyling : false,
+            reverseButtons: false,
+            showCloseButton: true,
+            allowOutsideClick: false
+        });
+    }
+</script>

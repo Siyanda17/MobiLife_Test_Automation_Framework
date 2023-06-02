@@ -1,16 +1,14 @@
 package com.mobilife.pages.SpecificDebit;
 
 import com.mobilife.Driver.DriverSingleton;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -23,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  **/
 
 public class SpecificDebitPage {
-    private WebDriver driver;
+    private final WebDriver driver;
     @FindBy(css = "#c9_searchBox")
     private WebElement searchBox;
 
@@ -74,9 +72,28 @@ public class SpecificDebitPage {
      *
      * @return rows a list of rows from Specific Debit Table
      * */
-    public List<WebElement> getRows () {
+    private List<WebElement> getRows () {
         List<WebElement> rows = table.findElements(By.tagName("tr"));
         return rows;
+    }
+    public List<WebElement> getSubmittedPolicies(){
+        List<WebElement> rows = getRows();
+        List<WebElement> submittedPolicies = new ArrayList<>();
+
+        for (WebElement row : rows) {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            String script = "return window.getComputedStyle(arguments[0], '::before').content;";
+
+            WebElement cellElement = row.findElement(By.cssSelector("table > tbody > tr:nth-child(8) > td:nth-child(5) > i")); // Replace with appropriate locator for the cell element
+            String contentValue = (String) js.executeScript(script, cellElement);
+            if(contentValue.equals("\\f00c")){
+                submittedPolicies.add(row);
+            }
+            // String cellText = cellElement.getText();
+         //   System.out.println("Cell text: " + cellText);
+        }
+
+        return submittedPolicies;
     }
 
 
@@ -88,7 +105,7 @@ public class SpecificDebitPage {
      * <p>
      * */
     public void AddSpecificDebit(){
-        driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
         AddSpecificDebitBtn.click();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(15000));
         //Specific Debit Details Window will appear
