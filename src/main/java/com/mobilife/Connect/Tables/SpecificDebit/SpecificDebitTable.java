@@ -2,6 +2,7 @@ package com.mobilife.Connect.Tables.SpecificDebit;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Represents a Specific Debit Table from the policies_preprod
@@ -17,7 +18,7 @@ public class SpecificDebitTable {
     private Double PolicyAmount;
 	private int Submitted ;
 	private String Notes;
-    private LocalDate LastUpdated;
+    private LocalDateTime LastUpdated;
 	private String SearchMetaInfo;
     private String CollectionMethod;
     private int Policy;
@@ -74,12 +75,12 @@ public class SpecificDebitTable {
         Notes = notes;
     }
 
-    public LocalDate getLastUpdated () {
+    public LocalDateTime getLastUpdated () {
         return LastUpdated;
     }
 
-    public void setLastUpdated (String lastUpdated) {
-        LastUpdated = LocalDate.parse(lastUpdated);
+    public void setLastUpdated (LocalDateTime lastUpdated) {
+        LastUpdated = lastUpdated;
     }
 
     public String getSearchMetaInfo () {
