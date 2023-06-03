@@ -79,12 +79,17 @@ public class SpecificDebitPage {
     public List<WebElement> getSubmittedPolicies(){
         List<WebElement> rows = getRows();
         List<WebElement> submittedPolicies = new ArrayList<>();
+        try {
+            Thread.sleep(6L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         for (WebElement row : rows) {
             JavascriptExecutor js = (JavascriptExecutor) driver;
             String script = "return window.getComputedStyle(arguments[0], '::before').content;";
 
-            WebElement cellElement = row.findElement(By.cssSelector("table > tbody > tr:nth-child(8) > td:nth-child(5) > i")); // Replace with appropriate locator for the cell element
+            WebElement cellElement = row.findElement(By.cssSelector("tbody > tr:nth-child(8) > td:nth-child(5) > i")); // Replace with appropriate locator for the cell element
             String contentValue = (String) js.executeScript(script, cellElement);
             if(contentValue.equals("\\f00c")){
                 submittedPolicies.add(row);
