@@ -1,0 +1,33 @@
+<configuration>
+
+    <!-- Define log levels -->
+    <root level="info"/>
+
+    <!-- Define appenders -->
+     <!-- Console Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+        <!-- File Appender -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>src/test/resources/logs/SpecificDebitLog.log</file> <!-- Specify the file path and name -->
+        <encoder>
+            <pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+
+    <!-- Link appenders to loggers -->
+    <logger name="com.mobilife.Utilities.Log" level="main">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="Steps.StepDefinition" level="test">
+        <appender-ref ref="FILE"/> <!-- Link the appender to the logger -->
+    </logger>
+
+
+</configuration>

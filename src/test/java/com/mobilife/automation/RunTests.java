@@ -3,6 +3,7 @@ package com.mobilife.automation;
 
 import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -20,5 +21,6 @@ import org.junit.runner.RunWith;
 public class RunTests  {
     @Test
     public void test(){}
+
 
 }

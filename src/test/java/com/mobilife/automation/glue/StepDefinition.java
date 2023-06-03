@@ -1,8 +1,8 @@
 package com.mobilife.automation.glue;
 
-import com.aventstack.extentreports.ExtentReports;
 import com.mobilife.Connect.Tables.Policy.PolicyRowMapper;
 import com.mobilife.Connect.Tables.Policy.PolicyTable;
+import com.mobilife.Utilities.Log;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -77,7 +77,7 @@ public class StepDefinition {
         specificDebitDetailsWindow = new SpecificDebitDetailsWindow();
         specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,policy);
         policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,policy);
-
+        Log.info(scenarioName+" : Initialize Objects");
 
     }
     /**
@@ -86,6 +86,8 @@ public class StepDefinition {
     @Before
     public void setUp(Scenario scenario){
         scenarioName = scenario.getName();
+        Log.getLogData(Log.class.getName());
+        Log.startTest(scenarioName);
 
         if (scenarioName.equals("Delete Specific Debit")) {
             specificDebitDetailsWindow.getCancelBtn().click();
@@ -117,12 +119,14 @@ public class StepDefinition {
         loginPage.login(Constants.USERNAME, configurationProperties.getPassword());
         loginPage.AuthenticateLogin();
         mainPage.GoToSpecificDebitPage();
+        Log.info(scenarioName+" : On the specific debit tab");
 
     }
 
     @When("I Add a Specific Debit")
     public void iAddASpecificDebit () {
         specificDebitPage.AddSpecificDebit();
+        Log.info("Add Specific Debit");
     }
 
     @Then("Specific Debit Details window appears")
@@ -136,11 +140,13 @@ public class StepDefinition {
         specificDebitDetailsWindow.SearchForUniquePolicy("P0054805802LA1");
         //System.out.println(specificDebitTableObject.getPolicyAmount());
         System.out.println(policyTableObject.getUniquePolicyNumber());
+        Log.info(policyTableObject.getUniquePolicyNumber());
     }
 
     @When("I select the policy")
     public void iSelectThePolicy () {
         specificDebitDetailsWindow.SelectPolicy();
+        Log.info(scenarioName+ ": Select Policy");
     }
 
     @Then("Policy number filed is populated")
@@ -152,18 +158,21 @@ public class StepDefinition {
         }
         System.out.println(specificDebitDetailsWindow.getPolicyNumber());
       assertFalse(specificDebitDetailsWindow.getPolicyNumber().getAttribute("value").isEmpty());
+      Log.info(scenarioName + " : Policy number filed is populated");
     }
 
     @And("Policy number is uneditable")
     public void policyNumberIsUneditable () {
         //Policy TextBox not enabled
         assertFalse(specificDebitDetailsWindow.isPolicyTextboxEnable());
+        Log.info(scenarioName +" : Policy number is uneditable");
     }
 
     @And("Collection Method Should be {string}")
     public void collectionMethodShouldBeSSVS (String args0) {
         String actual = specificDebitDetailsWindow.getCollectionMethod().getText().substring(0,4);
         assertEquals("Collection Method should be SSVS",args0,actual);
+        Log.info("Collection Method Should be SSVS");
     }
 
     @And("Premium Month date picker translates to MM\\/YY")
