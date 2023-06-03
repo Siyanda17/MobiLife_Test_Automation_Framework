@@ -4,6 +4,8 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 /**
@@ -27,7 +29,11 @@ public class SpecificDebitRowMapper implements RowMapper<SpecificDebitTable> {
         specificDebitTable.setDeleted(rs.getInt("Deleted"));
         specificDebitTable.setSubmitted(rs.getInt("Submitted"));
         specificDebitTable.setPolicyAmount(rs.getDouble("PolicyAmount"));
-        specificDebitTable.setLastUpdated(rs.getString("LastUpdated"));
+        String dateTimeString = rs.getString("LastUpdated");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime dateTime = LocalDateTime.parse(dateTimeString, formatter);
+
+        specificDebitTable.setLastUpdated(dateTime);
 
         // Set other properties as needed
         return specificDebitTable;
