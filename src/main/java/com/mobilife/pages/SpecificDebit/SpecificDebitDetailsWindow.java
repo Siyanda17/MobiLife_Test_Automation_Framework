@@ -65,6 +65,15 @@ public class SpecificDebitDetailsWindow {
     @FindBy(css = "button[class='swal2-confirm btn btn-primary']")
     private WebElement duplicatePopUpBtn;
 
+    @FindBy(css = "body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div")
+    private WebElement deleteDialog;
+
+    @FindBy(css = "div.swal2-actions > button.swal2-confirm.btn.btn-success-green")
+    private WebElement deleteDialogYes;
+
+    @FindBy(css = "div.swal2-actions > button.swal2-cancel.btn.btn-danger")
+    private WebElement deleteDialogNo;
+
     public WebElement getCollectionMethod () {
         return collectionMethod;
     }
@@ -261,6 +270,18 @@ public class SpecificDebitDetailsWindow {
         return submittedCheckbox;
     }
 
+    public WebElement getDeleteDialog () {
+        return deleteDialog;
+    }
+
+    public WebElement getDeleteDialogYes () {
+        return deleteDialogYes;
+    }
+
+    public WebElement getDeleteDialogNo () {
+        return deleteDialogNo;
+    }
+
     /**
      * Deletes a Specific Debit
      * */
@@ -268,6 +289,13 @@ public class SpecificDebitDetailsWindow {
         WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
         wait.until(ExpectedConditions.elementToBeClickable(deleteBtn));
         deleteBtn.click();
+    }
+    public void confirmDelete(){ WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5L));
+        wait.until(ExpectedConditions.elementToBeClickable(deleteDialogYes));
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("document.querySelector(\"div.swal2-actions > button.swal2-confirm.btn.btn-success-green\").click();");
+
+
     }
 
     /**
@@ -282,6 +310,11 @@ public class SpecificDebitDetailsWindow {
     public Boolean isDuplicate(){
         boolean isDuplicate = false;
         try {
+            try {
+                Thread.sleep(8L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             driver.switchTo().alert();
             isDuplicate = true;
         }catch (NoAlertPresentException e){
