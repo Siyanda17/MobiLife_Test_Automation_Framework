@@ -89,9 +89,10 @@ public class SpecificDebitPage {
             JavascriptExecutor js = (JavascriptExecutor) driver;
             String script = "return window.getComputedStyle(arguments[0], '::before').content;";
 
-            WebElement cellElement = row.findElement(By.cssSelector("tbody > tr:nth-child(8) > td:nth-child(5) > i")); // Replace with appropriate locator for the cell element
-            String contentValue = (String) js.executeScript(script, cellElement);
-            if(contentValue.equals("\\f00c")){
+            WebElement cellElement = row.findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[4]/td[5]/i[1]")); // Replace with appropriate locator for the cell element
+            //String contentValue = (String) js.executeScript(script, cellElement);
+            String contentValue = cellElement.getCssValue("color");
+            if(contentValue.equals("green")){
                 submittedPolicies.add(row);
             }
             // String cellText = cellElement.getText();

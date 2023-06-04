@@ -105,6 +105,7 @@ public class StepDefinition {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+
             specificDebitPage.getLatestSpecificDebit();
         }
     }
