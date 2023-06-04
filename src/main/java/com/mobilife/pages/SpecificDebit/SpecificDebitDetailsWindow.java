@@ -1,12 +1,14 @@
 package com.mobilife.pages.SpecificDebit;
 
 import com.mobilife.Driver.DriverSingleton;
+import com.mobilife.Utilities.Log;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
 
 import java.time.Duration;
 import java.util.*;
@@ -308,18 +310,24 @@ public class SpecificDebitDetailsWindow {
         saveBtn.click();
     }
     public Boolean isDuplicate(){
-        boolean isDuplicate = false;
+        boolean isDuplicate;
         try {
-            try {
-                Thread.sleep(8L);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            driver.switchTo().alert();
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20L));
+            wait.until(ExpectedConditions.visibilityOf(duplicatePopUp));
+           // boolean isDisplayed = duplicatePopUp.isDisplayed();
+            //assertTrue(duplicatePopUp.isDisplayed());
             isDuplicate = true;
-        }catch (NoAlertPresentException e){
+            Log.info("Duplicate True");
+
+        }catch (NullPointerException|TimeoutException e){
             isDuplicate = false;
+            Log.info("Duplicate False");
+
+
         }
+
+
+
 
 
         return isDuplicate;

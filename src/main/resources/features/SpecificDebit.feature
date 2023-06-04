@@ -60,7 +60,7 @@ Feature: Specific Debit
   @Done
     Scenario:  Delete Specific Debit
       When delete a saved  specific debit before it has been submitted
-      Then deleting a Specific Debit the 'Deleted' column in the database table gets popuplated
+      Then deleting a Specific Debit the 'Deleted' column in the database table gets populated
 
       And  Cannot delete a specific debit after it has been submitted
 

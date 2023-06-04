@@ -28,11 +28,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 
 import static java.lang.System.out;
 import static java.lang.Thread.sleep;
@@ -59,6 +61,7 @@ public class StepDefinition {
     @Autowired
     ConfigurationProperties configurationProperties;
 
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
@@ -67,7 +70,7 @@ public class StepDefinition {
     public StepDefinition () {
     }
 
-    @Before
+    @Before(order = 1)
     public void initializeObjects(){
         DriverSingleton.getInstance(configurationProperties.getBrowser());
         int policy = 152738;
@@ -83,22 +86,22 @@ public class StepDefinition {
     /**
      * Set up for the different scenarios
      * */
-    @Before
+    @Before(order = 2)
     public void setUp(Scenario scenario){
         scenarioName = scenario.getName();
         Log.getLogData(Log.class.getName());
         Log.startTest(scenarioName);
-
+        driver = DriverSingleton.getDriver();
         if (scenarioName.equals("Delete Specific Debit")) {
             specificDebitDetailsWindow.getCancelBtn().click();
             try {
-                Thread.sleep(3_500);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             specificDebitPage.searchSpecificDebit("P0054805802LA1");
             try {
-                Thread.sleep(3_500);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -108,7 +111,7 @@ public class StepDefinition {
     @Given("I am on Specific Debit Tab")
     public void i_am_on_specific_debit_tab(){
 
-        driver = DriverSingleton.getDriver();
+
         driver.get(Constants.URL);
         try {
             Thread.sleep(5000);
@@ -223,13 +226,14 @@ public class StepDefinition {
         specificDebitDetailsWindow.saveSpecificDebit();
 
         if(!scenarioName.equals("Add Specific Debit without filling in fields")){
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5L));
-            wait.until(ExpectedConditions.elementToBeClickable(specificDebitDetailsWindow.getDuplicatePopUpBtn()));
-            // Execute JavaScript code to click the button
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-            js.executeScript("document.querySelector(\"body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div > div.swal2-header > button\").click();");
-
+            if(specificDebitDetailsWindow.isDuplicate()) {
+                Log.info("is a duplicate");
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20L),Duration.ofSeconds(5L));
+                wait.until(ExpectedConditions.elementToBeClickable(specificDebitDetailsWindow.getDuplicatePopUpBtn()));
+                // Execute JavaScript code to click the button
+                JavascriptExecutor js = (JavascriptExecutor) driver;
+                js.executeScript("document.querySelector(\"div.swal2-actions > button.swal2-confirm.btn.btn-primary\").click();");
+            }
             // specificDebitDetailsWindow.getDuplicatePopUpBtn().click();
             assertFalse(specificDebitDetailsWindow.isDuplicate());
         }
@@ -312,16 +316,40 @@ public class StepDefinition {
         //Add more lines
 
         specificDebitDetailsWindow.deleteSpecificDebit();
+        specificDebitDetailsWindow.confirmDelete();
     }
 
-    @Then("deleting a Specific Debit the {string} column in the database table gets popuplated")
-    public void deletingASpecificDebitTheDeletedColumnInTheDatabaseTableGetsPopuplated () {
-       SpecificDebitTable deletedSpecific = specificDebitTableObject.get(specificDebitTableObject.size()-1);
+    @Then("deleting a Specific Debit the {string} column in the database table gets populated")
+    public void deletingASpecificDebitTheDeletedColumnInTheDatabaseTableGetsPopulated (String arg0) {
+
+        driver.get(Constants.SPECIFICDEBITURL);
+        int policy = 152738;
+        try {
+            Thread.sleep(5L);
+            specificDebitTableObject = jdbcTemplate.query("SELECT *\n" +
+                    "                            FROM SpecificDebit s\n" +
+                    "                    WHERE s.Id = (\n" +
+                    "                            SELECT MAX(Id)\n" +
+                    "                    FROM SpecificDebit\n" +
+                    "                    WHERE Policy = ?\n" +
+                    "            \n" +
+                    "            )",specificDebitRowMapper,policy);
+
+            Thread.sleep(5L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        SpecificDebitTable deletedSpecific = specificDebitTableObject.get(specificDebitTableObject.size()-1);
         assertEquals(1, deletedSpecific.getDeleted());
     }
 
     @And("Cannot delete a specific debit after it has been submitted")
     public void cannotDeleteASpecificDebitAfterItHasBeenSubmitted () {
+        try {
+            Thread.sleep(Duration.ofSeconds(10));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         String policy = specificDebitPage.getSubmittedPolicies()
                 .get(0)
                 .findElement(By.cssSelector("table > tbody > tr:nth-child(1) > td:nth-child(2)"))
@@ -340,6 +368,13 @@ public class StepDefinition {
 
     @When("Allow Edit Specific Debit before Submission")
     public void allowEditSpecificDebitBeforeSubmission () {
+        driver.get(Constants.SPECIFICDEBITURL);
+        try {
+            Thread.sleep(5L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        specificDebitPage.searchSpecificDebit(specificDebitPage.getSubmittedPolicies().get(0).findElements(By.cssSelector("#c9_dataGrid > table > tbody > tr:nth-child(4) > td:nth-child(2)")).get(0).getText());
     }
 
     @When("Deny Edit Specific Debit after Submission")

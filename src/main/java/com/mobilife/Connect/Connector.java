@@ -38,6 +38,7 @@ public class Connector {
         dataSource.setPassword(configurationProperties.getDatabasePassword());
         return dataSource;
     }
+
     public Connection getConnection () {
 
         return connection;

@@ -4,6 +4,7 @@ import com.mobilife.Driver.strategies.DriverStrategy;
 import com.mobilife.Driver.strategies.DriverStrategyImplementer;
 import org.openqa.selenium.WebDriver;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,7 +26,7 @@ public class DriverSingleton {
     public WebDriver instantiate(String strategy){
         DriverStrategy driverStrategy = DriverStrategyImplementer.chooseStrategy(strategy);
         driver = driverStrategy.setStrategy();
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.manage().window().maximize();
 
         return driver;
@@ -45,7 +46,7 @@ public class DriverSingleton {
     }
 
     public static WebDriver getDriver() {
-        driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         return driver;
     }
 }
