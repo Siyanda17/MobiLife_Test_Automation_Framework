@@ -1,6 +1,7 @@
 package com.mobilife.pages.SpecificDebit;
 
 import com.mobilife.Driver.DriverSingleton;
+import com.mobilife.Utilities.Log;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -92,7 +93,10 @@ public class SpecificDebitPage {
             WebElement cellElement = row.findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[4]/td[5]/i[1]")); // Replace with appropriate locator for the cell element
             //String contentValue = (String) js.executeScript(script, cellElement);
             String contentValue = cellElement.getCssValue("color");
-            if(contentValue.equals("green")){
+            System.out.println(contentValue);
+            Log.info(contentValue);
+            //If green then add
+            if(contentValue.equals("rgba(0, 128, 0, 1)")){
                 submittedPolicies.add(row);
             }
             // String cellText = cellElement.getText();
@@ -118,4 +122,18 @@ public class SpecificDebitPage {
         WebElement popup = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("modal-content")));
     }
 
+    public void getASubmittedPolicy () {
+        List<WebElement> rows = getRows();
+        for (WebElement row: rows){
+        WebElement cellElement = row.findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[4]/td[5]/i[1]")); // Replace with appropriate locator for the cell element
+        //String contentValue = (String) js.executeScript(script, cellElement);
+        String contentValue = cellElement.getCssValue("color");
+        System.out.println(contentValue);
+            if(contentValue.equals("rgba(0, 128, 0, 1)")){
+                row.click();
+                break;
+            }
+
+        }
+    }
 }

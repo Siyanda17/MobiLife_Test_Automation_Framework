@@ -205,7 +205,7 @@ public class StepDefinition {
     @Then("Enter Action Date")
     public void enterActionDate () {
         try {
-            Thread.sleep(4000);
+            Thread.sleep(3000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -353,10 +353,12 @@ public class StepDefinition {
         }
         String policy = specificDebitPage.getSubmittedPolicies()
                 .get(0)
-                .findElement(By.cssSelector("table > tbody > tr:nth-child(1) > td:nth-child(2)"))
+                .findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[2]"))
                 .getText();
         out.println(policy);
         specificDebitPage.searchSpecificDebit(policy);
+        specificDebitPage.getASubmittedPolicy();
+
     }
 
     @When("Adding for inactive contract payment status")
