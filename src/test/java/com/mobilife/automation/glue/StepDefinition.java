@@ -1,5 +1,8 @@
 package com.mobilife.automation.glue;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import com.mobilife.Connect.Tables.Policy.PolicyRowMapper;
 import com.mobilife.Connect.Tables.Policy.PolicyTable;
 import com.mobilife.Utilities.Log;
@@ -35,6 +38,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 import static java.lang.System.out;
 import static java.lang.Thread.sleep;
@@ -57,6 +61,10 @@ public class StepDefinition {
     private List<SpecificDebitTable> specificDebitTableObject;
     private PolicyTable policyTableObject;
     private final RowMapper<PolicyTable> policyTableRowMapper = new PolicyRowMapper();
+    static ExtentReports extent;
+    ExtentSparkReporter spark = new ExtentSparkReporter("Specific_Debit_Regression_Report.html");
+    ExtentTest test;
+
 
     @Autowired
     ConfigurationProperties configurationProperties;
@@ -81,6 +89,10 @@ public class StepDefinition {
         specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,policy);
         policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,policy);
         Log.info(scenarioName+" : Initialize Objects");
+        extent = new ExtentReports();
+        //Can have more than one report attached
+        extent.attachReporter(spark);
+
 
     }
     /**
@@ -89,9 +101,15 @@ public class StepDefinition {
     @Before(order = 2)
     public void setUp(Scenario scenario){
         scenarioName = scenario.getName();
+
         Log.getLogData(Log.class.getName());
         Log.startTest(scenarioName);
+
+        test = extent.createTest(scenarioName).assignAuthor("Yakhuxolo Mxabo")
+                .assignCategory("Specific Debit Regression").assignDevice(configurationProperties.getBrowser());
+
         driver = DriverSingleton.getDriver();
+
         if (scenarioName.equals("Delete Specific Debit")) {
             specificDebitDetailsWindow.getCancelBtn().click();
             try {
@@ -109,20 +127,77 @@ public class StepDefinition {
             specificDebitPage.getLatestSpecificDebit();
         }
     }
+    @Given("I am on the login page")
+    public void iAmOnTheLoginPage () {
+        driver.get(Constants.URL);
+
+
+    }
+
+    @When("I enter my valid username and password")
+    public void iEnterMyValidAnd () {
+        loginPage.login(Constants.USERNAME, configurationProperties.getPassword());
+        try {
+            WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+            wait.until(ExpectedConditions.alertIsPresent());
+            test.fail("incorrect details");
+        }catch (TimeoutException e){
+            Log.info("Correct Details");
+            test.pass("I enter my valid username and password");
+        }
+
+    }
+
+    @And("click the {string} button")
+    public void clickTheButton (String arg0) {
+        loginPage.AuthenticateLogin();
+        try{
+            loginPage.getOneTimePin().isDisplayed();
+            test.fail("Hasn't Authenticated");
+            Log.error("not Authenticated");
+        }catch (NullPointerException e){
+            Log.info("Authenticated");
+            test.pass("click the {string} button");
+            test.pass("User has been Authenticated");
+        }
+
+    }
+
+    @Then("I should be redirected to the homepage")
+    public void iShouldBeRedirectedToTheHomepage () {
+        try {
+            assertEquals(Constants.URL, driver.getCurrentUrl());
+            test.pass("I should be redirected to the homepage");
+            Log.info("on the homepage");
+        }catch (AssertionError|NullPointerException e){
+            test.fail("Not on the homepage");
+            Log.error("Not on the homepage");
+        }
+    }
+
+    @And("see a welcome message with my {string}")
+    public void seeAWelcomeMessageWithMy (String arg0) {
+        if (mainPage.getMessage().equals(arg0)){
+           test.pass("Welcome message appearing on screen");
+           Log.info("Welcome Message appearing");
+        }else {
+            Log.error("Welcome Message not appearing");
+            test.fail("No Welcome message appearing on screen");
+            assertEquals(arg0,mainPage.getMessage());
+        }
+    }
     @Given("I am on Specific Debit Tab")
     public void i_am_on_specific_debit_tab(){
 
+        mainPage.GoToSpecificDebitPage();
 
-        driver.get(Constants.URL);
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         //Using Constants because  configurationProperties Changes the username
-        loginPage.login(Constants.USERNAME, configurationProperties.getPassword());
-        loginPage.AuthenticateLogin();
-        mainPage.GoToSpecificDebitPage();
+
         Log.info(scenarioName+" : On the specific debit tab");
 
     }
@@ -346,17 +421,26 @@ public class StepDefinition {
 
     @And("Cannot delete a specific debit after it has been submitted")
     public void cannotDeleteASpecificDebitAfterItHasBeenSubmitted () {
+        // Create an instance of the Random class
+        Random random = new Random();
+
+        // Generate a random integer between 0 and 999 (inclusive)
         try {
             Thread.sleep(Duration.ofSeconds(10));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         String policy = specificDebitPage.getSubmittedPolicies()
-                .get(0)
+                .get(random.nextInt(specificDebitPage.getSubmittedPolicies().size()))
                 .findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[2]"))
                 .getText();
         out.println(policy);
         specificDebitPage.searchSpecificDebit(policy);
+        try {
+            Thread.sleep(Duration.ofSeconds(10));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         specificDebitPage.getASubmittedPolicy();
 
     }
@@ -372,38 +456,26 @@ public class StepDefinition {
     @When("Allow Edit Specific Debit before Submission")
     public void allowEditSpecificDebitBeforeSubmission () {
         driver.get(Constants.SPECIFICDEBITURL);
+        Random random = new Random();
         try {
             Thread.sleep(5L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        specificDebitPage.searchSpecificDebit(specificDebitPage.getSubmittedPolicies().get(0).findElements(By.cssSelector("#c9_dataGrid > table > tbody > tr:nth-child(4) > td:nth-child(2)")).get(0).getText());
+        String policy = specificDebitPage.getSubmittedPolicies()
+                .get(random.nextInt(specificDebitPage.getSubmittedPolicies().size()))
+                .findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[2]"))
+                .getText();
+        specificDebitPage.searchSpecificDebit(policy);
+        specificDebitPage.getAnUnSubmittedPolicy();
     }
 
     @When("Deny Edit Specific Debit after Submission")
     public void denyEditSpecificDebitAfterSubmission () {
     }
 
-    @Given("I am on the login page")
-    public void iAmOnTheLoginPage () {
-    }
 
-    @When("I enter my valid username and password")
-    public void iEnterMyValidAnd () {
-    }
-
-    @And("click the {string} button")
-    public void clickTheButton (String arg0) {
-    }
-
-    @Then("I should be redirected to the homepage")
-    public void iShouldBeRedirectedToTheHomepage () {
-    }
-
-    @And("see a welcome message with my {string}")
-    public void seeAWelcomeMessageWithMy (String arg0) {
-    }
-    @After
+    @After(order = 1)
     public void  cleanUpScenario(){
         if(scenarioName.equals("Add Specific Debit")){
             if(specificDebitDetailsWindow.getSpecificDebitDetailsWindow().isDisplayed()){
@@ -413,6 +485,11 @@ public class StepDefinition {
 
             }
         }
+
+    }
+    @After(order = 2)
+    public void createReport(){
+        extent.flush();
     }
 
 

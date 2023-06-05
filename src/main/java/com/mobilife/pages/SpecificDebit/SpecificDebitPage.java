@@ -131,6 +131,28 @@ public class SpecificDebitPage {
         System.out.println(contentValue);
             if(contentValue.equals("rgba(0, 128, 0, 1)")){
                 row.click();
+                Log.info("Click the row");
+                break;
+            }
+
+        }
+    }
+
+    public void getAnUnSubmittedPolicy () {
+        List<WebElement> rows = getRows();
+        for (WebElement row: rows){
+            try {
+                Thread.sleep(Duration.ofSeconds(10));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            WebElement cellElement = row.findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[4]/td[5]/i[1]")); // Replace with appropriate locator for the cell element
+            //String contentValue = (String) js.executeScript(script, cellElement);
+            String contentValue = cellElement.getCssValue("color");
+            System.out.println(contentValue);
+            if(contentValue.contains("255, 0, 0, 1")){
+                row.click();
+                Log.info("Click the row");
                 break;
             }
 

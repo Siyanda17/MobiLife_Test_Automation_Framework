@@ -11,7 +11,7 @@ Feature: Specific Debit
     When I enter my valid username and password
     And click the "Login" button
     Then I should be redirected to the homepage
-    And see a welcome message with my "How can we help you?"
+    And see a welcome message with my "Welcome"
 
 
     @Done
@@ -70,7 +70,7 @@ Feature: Specific Debit
         When Adding for inactive contract payment status
         Then client contract payment status updates to 'active' and contract payment status reason to 'Client requested'
 
-        @PartiallyDone
+        @Done
         Scenario:  Edit Specific Debit
           When Allow Edit Specific Debit before Submission
           When Deny Edit Specific Debit after Submission
