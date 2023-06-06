@@ -46,7 +46,7 @@ public class SpecificDebitPage {
      *
      * */
     public void searchSpecificDebit(String policy){
-        driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
         searchBox.sendKeys(policy);
         searchBox.sendKeys(Keys.ENTER);
     }
@@ -63,7 +63,7 @@ public class SpecificDebitPage {
      * */
     public void getLatestSpecificDebit(){
         List<WebElement> rows = getRows();
-        driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         WebElement lastRow = rows.get(rows.size() - 1);
         lastRow.click();
     }
@@ -74,8 +74,7 @@ public class SpecificDebitPage {
      * @return rows a list of rows from Specific Debit Table
      * */
     private List<WebElement> getRows () {
-        List<WebElement> rows = table.findElements(By.tagName("tr"));
-        return rows;
+        return table.findElements(By.tagName("tr"));
     }
     public List<WebElement> getSubmittedPolicies(){
         List<WebElement> rows = getRows();

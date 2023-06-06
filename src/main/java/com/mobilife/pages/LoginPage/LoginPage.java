@@ -48,6 +48,9 @@ public class LoginPage {
     @FindBy(xpath = "(//button[normalize-space()='Authenticate'])[1]" )
     private WebElement authenticate;
 
+    @FindBy(css = ".swal2-popup.swal2-modal.swal2-show")
+    private WebElement incorrectInformationError;
+
     /**
      * Login to the Mobility Web Application
      *
@@ -56,7 +59,7 @@ public class LoginPage {
      *
      * */
     public void login(String username, String password){
-        driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         loginUsername.sendKeys(username);
         loginPassword.sendKeys(password);
         loginButton.click();
@@ -72,4 +75,11 @@ public class LoginPage {
         authenticate.click();
     }
 
+    public WebElement getIncorrectInformationError () {
+        return incorrectInformationError;
+    }
+
+    public WebElement getOneTimePin () {
+        return oneTimePin;
+    }
 }

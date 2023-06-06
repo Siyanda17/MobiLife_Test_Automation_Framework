@@ -33,6 +33,9 @@ public class MainPage {
     @FindBy(css = "a[class='dropdown-toggle']")
     private  WebElement cogElement;
 
+    @FindBy(css = "#c1")
+    private WebElement welcomeMessage;
+
     /*
     *
     * */
@@ -57,5 +60,13 @@ public class MainPage {
         specificDebit.click();
     }
 
-
+    public WebElement getWelcomeMessageElement () {
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
+        return welcomeMessage;
+    }
+    public String getMessage(){
+        WebDriverWait  wait = new WebDriverWait(driver,Duration.ofSeconds(15L));
+        wait.until(ExpectedConditions.visibilityOf(welcomeMessage));
+        return welcomeMessage.getText().substring(0,7);
+    }
 }

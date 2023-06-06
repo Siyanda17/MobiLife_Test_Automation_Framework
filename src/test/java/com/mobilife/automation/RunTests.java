@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
         features = "src/main/resources/features",
         tags = "@Done",
-        plugin = {"pretty","html:target/cucumber-html-report.html"},
+        plugin = {"pretty","html:target/cucumber-html-report.html","com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:"},
         objectFactory = io.cucumber.spring.SpringFactory.class
 
 )
@@ -23,7 +23,12 @@ import org.junit.runner.RunWith;
 public class RunTests  {
     @Test
     public void test(){}
-
+    /*
+     * @Override
+     *
+     * @DataProvider(parallel = true) public Object[][] scenarios() {
+     * System.out.println("PARALLEL"); return super.scenarios(); }
+     */
     @After
     public void tearDown(){
        // StepDefinition.extent.flush();

@@ -61,6 +61,7 @@ public class StepDefinition {
     private List<SpecificDebitTable> specificDebitTableObject;
     private PolicyTable policyTableObject;
     private final RowMapper<PolicyTable> policyTableRowMapper = new PolicyRowMapper();
+    private Scenario scenario;
     static ExtentReports extent;
     ExtentSparkReporter spark = new ExtentSparkReporter("Specific_Debit_Regression_Report.html");
     ExtentTest test;
@@ -91,7 +92,7 @@ public class StepDefinition {
         Log.info(scenarioName+" : Initialize Objects");
         extent = new ExtentReports();
         //Can have more than one report attached
-        extent.attachReporter(spark);
+       // extent.attachReporter(spark);
 
 
     }
@@ -100,13 +101,15 @@ public class StepDefinition {
      * */
     @Before(order = 2)
     public void setUp(Scenario scenario){
+        this.scenario = scenario;
         scenarioName = scenario.getName();
 
         Log.getLogData(Log.class.getName());
         Log.startTest(scenarioName);
+        scenario.log(scenarioName);
 
-        test = extent.createTest(scenarioName).assignAuthor("Yakhuxolo Mxabo")
-                .assignCategory("Specific Debit Regression").assignDevice(configurationProperties.getBrowser());
+//        test = extent.createTest(scenarioName).assignAuthor("Yakhuxolo Mxabo")
+//                .assignCategory("Specific Debit Regression").assignDevice(configurationProperties.getBrowser());
 
         driver = DriverSingleton.getDriver();
 
@@ -140,10 +143,10 @@ public class StepDefinition {
         try {
             WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
             wait.until(ExpectedConditions.alertIsPresent());
-            test.fail("incorrect details");
+          //  test.fail("incorrect details");
         }catch (TimeoutException e){
             Log.info("Correct Details");
-            test.pass("I enter my valid username and password");
+           // test.pass("I enter my valid username and password");
         }
 
     }
@@ -153,12 +156,12 @@ public class StepDefinition {
         loginPage.AuthenticateLogin();
         try{
             loginPage.getOneTimePin().isDisplayed();
-            test.fail("Hasn't Authenticated");
+            //test.fail("Hasn't Authenticated");
             Log.error("not Authenticated");
         }catch (NullPointerException e){
             Log.info("Authenticated");
-            test.pass("click the {string} button");
-            test.pass("User has been Authenticated");
+//            test.pass("click the {string} button");
+//            test.pass("User has been Authenticated");
         }
 
     }
@@ -167,10 +170,12 @@ public class StepDefinition {
     public void iShouldBeRedirectedToTheHomepage () {
         try {
             assertEquals(Constants.URL, driver.getCurrentUrl());
-            test.pass("I should be redirected to the homepage");
+            scenario.log("I should be redirected to the homepage");
+            //test.pass("I should be redirected to the homepage");
             Log.info("on the homepage");
         }catch (AssertionError|NullPointerException e){
-            test.fail("Not on the homepage");
+            //test.fail("Not on the homepage");
+            scenario.log("Not on the homepage");
             Log.error("Not on the homepage");
         }
     }
@@ -178,12 +183,14 @@ public class StepDefinition {
     @And("see a welcome message with my {string}")
     public void seeAWelcomeMessageWithMy (String arg0) {
         if (mainPage.getMessage().equals(arg0)){
-           test.pass("Welcome message appearing on screen");
+           //test.pass("Welcome message appearing on screen");
            Log.info("Welcome Message appearing");
         }else {
             Log.error("Welcome Message not appearing");
-            test.fail("No Welcome message appearing on screen");
+            scenario.log("No Welcome message appearing on screen");
+          //  test.fail("No Welcome message appearing on screen");
             assertEquals(arg0,mainPage.getMessage());
+
         }
     }
     @Given("I am on Specific Debit Tab")
@@ -482,14 +489,14 @@ public class StepDefinition {
                 WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(5L));
                 wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getCancelBtn()));
                 ((JavascriptExecutor) driver).executeScript("arguments[0].click();", specificDebitDetailsWindow.getCancelBtn());
-
+                scenario.log("Close");
             }
         }
 
     }
     @After(order = 2)
     public void createReport(){
-        extent.flush();
+        //extent.flush();
     }
 
 
