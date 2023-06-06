@@ -3,6 +3,7 @@ package com.mobilife.pages.LoginPage;
 import com.mobilife.Driver.DriverSingleton;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -31,24 +32,31 @@ public class LoginPage {
     }
     //getting the Username textfield
     @FindBy(id = "c6")
+    @CacheLookup
     private WebElement loginUsername;
 
     @FindBy(xpath = "//input[@id='c7']")
+    @CacheLookup
     private WebElement loginPassword;
 
     @FindBy(css = "#c10")
+    @CacheLookup
     private WebElement loginButton;
 
     @FindBy(id = "notedFeedbackText")
+    @CacheLookup
     private WebElement oneTimePin;
 
     @FindBy(css = "#c1")
+    @CacheLookup
     private WebElement oneTimePinTextbox;
 
     @FindBy(xpath = "(//button[normalize-space()='Authenticate'])[1]" )
+    @CacheLookup
     private WebElement authenticate;
 
     @FindBy(css = ".swal2-popup.swal2-modal.swal2-show")
+    @CacheLookup
     private WebElement incorrectInformationError;
 
     /**

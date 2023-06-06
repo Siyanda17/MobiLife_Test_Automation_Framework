@@ -3,6 +3,7 @@ package com.mobilife.pages.MainPage;
 import com.mobilife.Driver.DriverSingleton;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -28,12 +29,15 @@ public class MainPage {
     }
 
     @FindBy(css = ".dropdown-toggle.rippleclick")
+    @CacheLookup
     private WebElement myProfileSetting;
 
     @FindBy(css = "a[class='dropdown-toggle']")
+    @CacheLookup
     private  WebElement cogElement;
 
     @FindBy(css = "#c1")
+    @CacheLookup
     private WebElement welcomeMessage;
 
     /*

@@ -3,6 +3,7 @@ package com.mobilife.pages.SpecificDebit;
 import com.mobilife.Driver.DriverSingleton;
 import com.mobilife.Utilities.Log;
 import org.openqa.selenium.*;
+import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -24,14 +25,18 @@ import java.util.concurrent.TimeUnit;
 public class SpecificDebitPage {
     private final WebDriver driver;
     @FindBy(css = "#c9_searchBox")
+    @CacheLookup
     private WebElement searchBox;
 
     @FindBy(xpath = "//table[@class='table table-hover table-striped table-bordered mrg-top10']")
+    @CacheLookup
     private WebElement table;
 
     @FindBy(id = "c2")
+    @CacheLookup
     private WebElement AddSpecificDebitBtn ;// = wait.until(ExpectedConditions.elementToBeClickable( By.xpath("//button[@id='c2']")))
     @FindBy(id = "c37")
+    @CacheLookup
     private WebElement importSpecificDebitBtn;
 
     public SpecificDebitPage(){

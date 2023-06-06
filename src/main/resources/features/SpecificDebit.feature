@@ -22,7 +22,7 @@ Feature: Specific Debit
       When I Add a Specific Debit
       Then Specific Debit Details window appears
       Then Find the policy
-      When I select the policy
+      Then the policy is "Selected"
       Then Policy number filed is populated
       And Policy number is uneditable
       And Collection Method Should be "SSVS"

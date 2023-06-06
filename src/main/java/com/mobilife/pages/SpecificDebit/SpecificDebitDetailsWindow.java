@@ -4,8 +4,8 @@ import com.mobilife.Driver.DriverSingleton;
 import com.mobilife.Utilities.Log;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -13,7 +13,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static org.openqa.selenium.support.PageFactory.initElements;
 
@@ -38,10 +37,13 @@ public class SpecificDebitDetailsWindow {
     private WebElement specificDebitDetailsWindow;
     //Specific Debit Details window
     @FindBy(id = "c18")
+    @CacheLookup
     private WebElement searchUniquePolicy;
     @FindBy(id = "c19")
+    @CacheLookup
     private WebElement findBtn;
     @FindBy(css = ".badge.badge-success.pull-right.item-badge")
+    @CacheLookup
     private WebElement selectPolicy;
 
     @FindBy(xpath = "//input[@id='c20']")
@@ -69,7 +71,7 @@ public class SpecificDebitDetailsWindow {
     private WebElement duplicatePopUpBtn;
 
     @FindBy(css = "body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div")
-    private WebElement deleteDialog;
+    private WebElement Dialog;
 
     @FindBy(css = "div.swal2-actions > button.swal2-confirm.btn.btn-success-green")
     private WebElement deleteDialogYes;
@@ -94,6 +96,7 @@ public class SpecificDebitDetailsWindow {
     private WebElement policyAmount;
 
     @FindBy(id = "c13")
+    @CacheLookup
     private WebElement submittedBtn;
 
     @FindBy(css = "#c13 > i")
@@ -103,12 +106,15 @@ public class SpecificDebitDetailsWindow {
     private WebElement notesBox;
 
     @FindBy(id = "c22")
+    @CacheLookup
     private WebElement saveBtn;
 
     @FindBy(id = "c23")
+    @CacheLookup
     private WebElement deleteBtn;
 
     @FindBy(xpath = "//button[@type='button'][normalize-space()='Cancel']")
+    @CacheLookup
     private WebElement cancelBtn;
 
     //Change method to return a Boolean for when we get result
@@ -165,6 +171,25 @@ public class SpecificDebitDetailsWindow {
         WebDriverWait wait2 = new WebDriverWait(driver, Duration.ofSeconds(5L));
         wait2.until(ExpectedConditions.elementToBeClickable(premiumMonthDialogDoneBtn));
        premiumMonthDialogDoneBtn.click();
+    }
+
+    public static String fromNumToMonth(int monthOfTheYear){
+        String month = switch (monthOfTheYear) {
+            case 1 -> "Jan" ;
+            case 2 -> "Feb" ;
+            case 3 -> "Mar" ;
+            case 4 -> "Apr" ;
+            case 5 -> "May";
+            case 6 -> "Jun";
+            case 7 -> "Jul";
+            case 8 -> "Aug";
+            case 9 -> "Sep";
+            case 10 -> "Oct";
+            case 11 -> "Nov" ;
+            case 12 -> "Dec";
+            default -> null;
+        };
+        return month;
     }
     /**
      * Action date is in the form dd/mm/yyyy
@@ -274,7 +299,7 @@ public class SpecificDebitDetailsWindow {
     }
 
     public WebElement getDeleteDialog () {
-        return deleteDialog;
+        return Dialog;
     }
 
     public WebElement getDeleteDialogYes () {
@@ -368,5 +393,13 @@ public class SpecificDebitDetailsWindow {
             return false;
         }
 
+    }
+
+    public WebElement getSelectBadge () {
+        return selectPolicy;
+    }
+
+    public WebElement policyDoesNotExist () {
+        return Dialog;
     }
 }

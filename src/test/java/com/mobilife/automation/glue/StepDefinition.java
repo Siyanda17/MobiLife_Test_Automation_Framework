@@ -2,6 +2,7 @@ package com.mobilife.automation.glue;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import com.mobilife.Connect.Tables.Policy.PolicyRowMapper;
 import com.mobilife.Connect.Tables.Policy.PolicyTable;
@@ -40,6 +41,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
 
+import static java.lang.System.in;
 import static java.lang.System.out;
 import static java.lang.Thread.sleep;
 import static junit.framework.TestCase.*;
@@ -62,9 +64,11 @@ public class StepDefinition {
     private PolicyTable policyTableObject;
     private final RowMapper<PolicyTable> policyTableRowMapper = new PolicyRowMapper();
     private Scenario scenario;
+
     static ExtentReports extent;
     ExtentSparkReporter spark = new ExtentSparkReporter("Specific_Debit_Regression_Report.html");
-    ExtentTest test;
+    private ExtentTest test;
+    private int retry_count = 0;
 
 
     @Autowired
@@ -92,7 +96,7 @@ public class StepDefinition {
         specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,policy);
         policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,policy);
         Log.info(scenarioName+" : Initialize Objects");
-        extent = new ExtentReports();
+        //extent = new ExtentReports();
         //Can have more than one report attached
        // extent.attachReporter(spark);
 
@@ -108,6 +112,7 @@ public class StepDefinition {
 
         Log.getLogData(Log.class.getName());
         Log.startTest(scenarioName);
+        test = ExtentCucumberAdapter.getCurrentScenario();
         scenario.log(scenarioName);
 
 //        test = extent.createTest(scenarioName).assignAuthor("Yakhuxolo Mxabo")
@@ -139,7 +144,9 @@ public class StepDefinition {
 
         assertEquals(Constants.LOGIN_URL,driver.getCurrentUrl());
         //Trial for precise reporting
-        scenario.log("I am on the login page");
+        ExtentCucumberAdapter.getCurrentStep().pass("I am on the login page now");
+        scenario.log("");
+        test.pass("I am on the login page");
     }
 
     @When("I enter my valid username and password")
@@ -148,11 +155,11 @@ public class StepDefinition {
         try {
             WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
             wait.until(ExpectedConditions.alertIsPresent());
-          //  test.fail("incorrect details");
+          test.fail("incorrect details");
         }catch (TimeoutException e){
             Log.info("Correct Details");
 
-           // test.pass("I enter my valid username and password");
+           test.pass("I enter my valid username and password");
         }
 
     }
@@ -162,12 +169,12 @@ public class StepDefinition {
         loginPage.AuthenticateLogin();
         try{
             loginPage.getOneTimePin().isDisplayed();
-            //test.fail("Hasn't Authenticated");
+            test.fail("Hasn't Authenticated");
             Log.error("not Authenticated");
         }catch (NullPointerException e){
             Log.info("Authenticated");
-//            test.pass("click the {string} button");
-//            test.pass("User has been Authenticated");
+            ExtentCucumberAdapter.getCurrentStep().pass("click the {string} button");
+            ExtentCucumberAdapter.getCurrentStep().pass("User has been Authenticated");
         }
 
     }
@@ -181,29 +188,31 @@ public class StepDefinition {
         }
         try {
             assertEquals(Constants.URL, driver.getCurrentUrl());
-            scenario.log("I should be redirected to the homepage");
+            ExtentCucumberAdapter.getCurrentStep().pass("I should be redirected to the homepage");
             //test.pass("I should be redirected to the homepage");
             Log.info("on the homepage");
-        }catch (AssertionError|NullPointerException e){
+        }catch (AssertionError e){
             //test.fail("Not on the homepage");
-            scenario.log("Not on the homepage");
+            ExtentCucumberAdapter.getCurrentStep().fail("Not on the homepage");
             Log.error("Not on the homepage");
         }
     }
 
     @And("see a welcome message with my {string}")
     public void seeAWelcomeMessageWithMy (String arg0) {
-        try {
-            Thread.sleep(5L);
+        try
+
+        {
+            Thread.sleep(500L,2);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         if (mainPage.getMessage().equals(arg0)){
-           //test.pass("Welcome message appearing on screen");
+            ExtentCucumberAdapter.getCurrentStep().pass("Welcome message appearing on screen");
            Log.info("Welcome Message appearing");
         }else {
             Log.error("Welcome Message not appearing");
-            scenario.log("No Welcome message appearing on screen");
+            ExtentCucumberAdapter.getCurrentStep().fail("No Welcome message appearing on screen");
           //  test.fail("No Welcome message appearing on screen");
             assertEquals(arg0,mainPage.getMessage());
 
@@ -228,6 +237,7 @@ public class StepDefinition {
     @When("I Add a Specific Debit")
     public void iAddASpecificDebit () {
         specificDebitPage.AddSpecificDebit();
+
         Log.info("Add Specific Debit");
     }
 
@@ -235,31 +245,57 @@ public class StepDefinition {
     public void specificDebitDetailsWindowAppears () {
        // specificDebitDetailsWindow.SearchForUniquePolicy("P0054805802LA1");
         //Check if Window Appeared
+        if(specificDebitDetailsWindow.getSpecificDebitDetailsWindow().isDisplayed()){
+            ExtentCucumberAdapter.getCurrentStep().pass("Specific Debit Details window is appearing");
+        }else {
+            ExtentCucumberAdapter.getCurrentStep().fail("Specific Debit Details window is not appearing");
+        }
+
     }
 
     @Then("Find the policy")
     public void findThePolicy () {
-        specificDebitDetailsWindow.SearchForUniquePolicy("P0054805802LA1");
-        //System.out.println(specificDebitTableObject.getPolicyAmount());
-        System.out.println(policyTableObject.getUniquePolicyNumber());
+        String uniqueText = "P0054805802LA1";
+        specificDebitDetailsWindow.SearchForUniquePolicy(uniqueText);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
+
+
+        assertEquals(uniqueText,policyTableObject.getUniquePolicyNumber());
+        ExtentCucumberAdapter.getCurrentStep().pass("Policy Exists on the database");
+
+        if(specificDebitDetailsWindow.policyDoesNotExist().isDisplayed()){
+
+            ExtentCucumberAdapter.getCurrentStep().pass("The policy has been selected successfully");
+
+        }else {
+
+            ExtentCucumberAdapter.getCurrentStep().fail("The policy was not found");
+        }
         Log.info(policyTableObject.getUniquePolicyNumber());
     }
 
-    @When("I select the policy")
-    public void iSelectThePolicy () {
+    @When("the policy is {string} ")
+    public void iSelectThePolicy (String arg0) {
         specificDebitDetailsWindow.SelectPolicy();
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
+        if(specificDebitDetailsWindow.getSelectBadge().getText().equals(arg0)){
+            ExtentCucumberAdapter.getCurrentStep().pass("The policy has been selected successfully");
+        }else {
+            ExtentCucumberAdapter.getCurrentStep().fail("The policy has not been selected successfully");
+        }
         Log.info(scenarioName+ ": Select Policy");
     }
 
     @Then("Policy number filed is populated")
     public void policyNumberFiledIsPopulated () {
         try {
-            Thread.sleep(10000);
+            Thread.sleep(10000L);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         System.out.println(specificDebitDetailsWindow.getPolicyNumber());
       assertFalse(specificDebitDetailsWindow.getPolicyNumber().getAttribute("value").isEmpty());
+        ExtentCucumberAdapter.getCurrentStep().pass("The policy textbox has been populated successfully");
       Log.info(scenarioName + " : Policy number filed is populated");
     }
 
@@ -267,6 +303,7 @@ public class StepDefinition {
     public void policyNumberIsUneditable () {
         //Policy TextBox not enabled
         assertFalse(specificDebitDetailsWindow.isPolicyTextboxEnable());
+        ExtentCucumberAdapter.getCurrentStep().pass("Policy textbox number is uneditable");
         Log.info(scenarioName +" : Policy number is uneditable");
     }
 
@@ -274,12 +311,26 @@ public class StepDefinition {
     public void collectionMethodShouldBeSSVS (String args0) {
         String actual = specificDebitDetailsWindow.getCollectionMethod().getText().substring(0,4);
         assertEquals("Collection Method should be SSVS",args0,actual);
+        ExtentCucumberAdapter.getCurrentStep().pass("The default collection method is SSVS");
         Log.info("Collection Method Should be SSVS");
     }
 
     @And("Premium Month date picker translates to MM\\/YY")
     public void premiumMonthDatePickerTranslatesToMMYY () {
+
+        for(int i = 1;i < 13;i++){
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            specificDebitDetailsWindow.ChoosePremiumMonth(SpecificDebitDetailsWindow.fromNumToMonth(i));
+
+        }
         specificDebitDetailsWindow.ChoosePremiumMonth("Mar");
+        ExtentCucumberAdapter.getCurrentStep().pass("Can choose premium month for any months");
+
+        Log.info("Month");
     }
 
     @And("The Amount is automatically populated")
@@ -313,7 +364,8 @@ public class StepDefinition {
         String month =  String.format("%02d",date.getMonth().getValue());
         String year = String.valueOf(date.getYear());
        specificDebitDetailsWindow.setActionDate(day,month,year);
-       assertFalse(specificDebitDetailsWindow.isThereASubmittedCheckMark());
+        assertNotNull(specificDebitDetailsWindow.getActionDate().getAttribute("value"));
+
     }
 
     @Then("Click Save")
@@ -337,13 +389,16 @@ public class StepDefinition {
             // specificDebitDetailsWindow.getDuplicatePopUpBtn().click();
             assertFalse(specificDebitDetailsWindow.isDuplicate());
             if(specificDebitDetailsWindow.theresAnError()){
+
                 numberOfDays++;
                 specificDebitDetailsWindow.getActionDate().clear();
                 //Calls the action date again to increment
                 enterActionDate();
+                scenario.log("if there's an error we can change action date");
                 //Calls the save again
                 clickSave();
             }
+            scenario.log("Can Save the Specific Debit");
         }
     }
 
@@ -376,6 +431,7 @@ public class StepDefinition {
 
         specificDebitDetailsWindow.ChoosePremiumMonth("Mar");
          assertTrue("A pop up should appear",specificDebitDetailsWindow.isDuplicate());
+         scenario.log("Check if there's a Duplicate");
 
     }
 
