@@ -3,6 +3,7 @@ package com.mobilife.pages.SpecificDebit;
 import com.mobilife.Driver.DriverSingleton;
 import com.mobilife.Utilities.Log;
 import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -359,6 +360,13 @@ public class SpecificDebitDetailsWindow {
      * Checks if there's an error below the action Textbox
      * */
     public boolean theresAnError () {
-        return errorTextUnderActionDate.isEnabled();
+        try{
+            errorTextUnderActionDate.isEnabled();
+            return true;
+
+        }catch (NoSuchElementException e){
+            return false;
+        }
+
     }
 }

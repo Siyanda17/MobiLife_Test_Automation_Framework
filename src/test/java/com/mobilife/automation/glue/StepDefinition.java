@@ -25,6 +25,8 @@ import com.mobilife.pages.SpecificDebit.SpecificDebitDetailsWindow;
 import com.mobilife.pages.SpecificDebit.SpecificDebitPage;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -135,7 +137,7 @@ public class StepDefinition {
         driver.get(Constants.URL);
 
 
-        assertEquals(Constants.URL,driver.getCurrentUrl());
+        assertEquals(Constants.LOGIN_URL,driver.getCurrentUrl());
         //Trial for precise reporting
         scenario.log("I am on the login page");
     }
@@ -336,6 +338,7 @@ public class StepDefinition {
             assertFalse(specificDebitDetailsWindow.isDuplicate());
             if(specificDebitDetailsWindow.theresAnError()){
                 numberOfDays++;
+                specificDebitDetailsWindow.getActionDate().clear();
                 //Calls the action date again to increment
                 enterActionDate();
                 //Calls the save again
@@ -346,7 +349,7 @@ public class StepDefinition {
 
     @And("If it's after {string} Mobility will show an error text")
     public void ifItSAfterMobilityWillShowAnErrorText (String arg0) {
-        LocalTime cutOffTime = LocalTime.of(Integer.parseInt(arg0.substring(0,1)), Integer.parseInt(arg0.substring(3,4)));
+        LocalTime cutOffTime = LocalTime.of(Integer.parseInt(arg0.substring(0,1)), Integer.parseInt(arg0.substring(3,5)));
         out.println(arg0.substring(0,2)+arg0.substring(3,5));
         String inputDate = specificDebitDetailsWindow.
                 getActionDate().
@@ -356,10 +359,15 @@ public class StepDefinition {
         //If Ran after 14:30 catch the error label
         if(LocalTime.now().isAfter(cutOffTime) &&
                         date.equals(LocalDate.now())){//Get the Error Text
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(10000));
-            wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getErrorTextUnderActionDate()));
+            Wait<WebDriver> fluentWait = new FluentWait<>(driver)
+                    .withTimeout(Duration.ofSeconds(20L))
+                    .pollingEvery(Duration.ofSeconds(2L))
+                    .ignoring(NoSuchElementException.class);
+            fluentWait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getErrorTextUnderActionDate()));
             String actualText = specificDebitDetailsWindow.getErrorTextUnderActionDate().getText();
-            assertTrue("Error text",specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());}
+            assertTrue("Error text",specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());
+
+        }
 
     }
 
