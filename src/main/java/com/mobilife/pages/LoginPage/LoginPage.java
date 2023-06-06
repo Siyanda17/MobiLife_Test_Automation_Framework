@@ -25,7 +25,7 @@ public class LoginPage {
 //    private static final By INPUT_USERNAME = By.xpath("//input[@id='c6']");
 //    private static final By INPUT_PASSWORD = By.xpath("//input[@id='c7']");
 //    private static final By  AUTHENTICATE = By.xpath("(//button[normalize-space()='Authenticate'])[1]");
-    private WebDriver driver;
+    private final WebDriver driver;
     public LoginPage(){
         driver = DriverSingleton.getDriver();
         PageFactory.initElements(driver, this);

@@ -262,27 +262,40 @@ public class StepDefinition {
 
         assertEquals(uniqueText,policyTableObject.getUniquePolicyNumber());
         ExtentCucumberAdapter.getCurrentStep().pass("Policy Exists on the database");
+        try {
 
-        if(specificDebitDetailsWindow.policyDoesNotExist().isDisplayed()){
+            specificDebitDetailsWindow.policyDoesNotExist().isDisplayed() ;
+            ExtentCucumberAdapter.getCurrentStep().fail("The policy was not found");
+
+            if(retry_count>Constants.STEP_RETRY){
+                findThePolicy();
+            }
+
+
+        }catch (NoSuchElementException e){
+            retry_count = 0;
 
             ExtentCucumberAdapter.getCurrentStep().pass("The policy has been selected successfully");
 
-        }else {
-
-            ExtentCucumberAdapter.getCurrentStep().fail("The policy was not found");
         }
         Log.info(policyTableObject.getUniquePolicyNumber());
     }
 
-    @When("the policy is {string} ")
+    @When("the policy is {string}")
     public void iSelectThePolicy (String arg0) {
         specificDebitDetailsWindow.SelectPolicy();
+
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
+
         if(specificDebitDetailsWindow.getSelectBadge().getText().equals(arg0)){
+
             ExtentCucumberAdapter.getCurrentStep().pass("The policy has been selected successfully");
+
         }else {
+
             ExtentCucumberAdapter.getCurrentStep().fail("The policy has not been selected successfully");
         }
+
         Log.info(scenarioName+ ": Select Policy");
     }
 
@@ -290,28 +303,39 @@ public class StepDefinition {
     public void policyNumberFiledIsPopulated () {
         try {
             Thread.sleep(10000L);
+
         } catch (InterruptedException e) {
+
             e.printStackTrace();
         }
+
         System.out.println(specificDebitDetailsWindow.getPolicyNumber());
-      assertFalse(specificDebitDetailsWindow.getPolicyNumber().getAttribute("value").isEmpty());
+
+        assertFalse(specificDebitDetailsWindow.getPolicyNumber().getAttribute("value").isEmpty());
+
         ExtentCucumberAdapter.getCurrentStep().pass("The policy textbox has been populated successfully");
-      Log.info(scenarioName + " : Policy number filed is populated");
+
+        Log.info(scenarioName + " : Policy number filed is populated");
     }
 
     @And("Policy number is uneditable")
     public void policyNumberIsUneditable () {
         //Policy TextBox not enabled
         assertFalse(specificDebitDetailsWindow.isPolicyTextboxEnable());
+
         ExtentCucumberAdapter.getCurrentStep().pass("Policy textbox number is uneditable");
+
         Log.info(scenarioName +" : Policy number is uneditable");
     }
 
     @And("Collection Method Should be {string}")
     public void collectionMethodShouldBeSSVS (String args0) {
         String actual = specificDebitDetailsWindow.getCollectionMethod().getText().substring(0,4);
+
         assertEquals("Collection Method should be SSVS",args0,actual);
+
         ExtentCucumberAdapter.getCurrentStep().pass("The default collection method is SSVS");
+
         Log.info("Collection Method Should be SSVS");
     }
 

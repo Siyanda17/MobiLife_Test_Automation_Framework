@@ -7,7 +7,7 @@ public enum SpecificDebitTestCases {
     T4("Check Submitted"),
     T5("Delete Specific Debit"),
     T6(" Add Specific Debit for inactive CPS");
-    private String testName;
+    private final String testName;
 
     SpecificDebitTestCases (String s) {
         this.testName = s;

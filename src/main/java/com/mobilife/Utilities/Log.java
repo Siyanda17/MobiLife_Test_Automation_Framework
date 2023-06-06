@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 public class Log {
-    private static Logger logger = LoggerFactory.getLogger(Log.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(Log.class.getName());
 
     public static Logger getLogData(String className){
         String path = new File("").getAbsolutePath();

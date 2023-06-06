@@ -121,10 +121,10 @@ public class SpecificDebitPage {
     public void AddSpecificDebit(){
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
         AddSpecificDebitBtn.click();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(15000));
-        //Specific Debit Details Window will appear
-        WebElement popup = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("modal-content")));
-    }
+//        WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(15000));
+//        //Specific Debit Details Window will appear
+//        WebElement popup = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("modal-content")));
+  }
 
     public void getASubmittedPolicy () {
         List<WebElement> rows = getRows();
