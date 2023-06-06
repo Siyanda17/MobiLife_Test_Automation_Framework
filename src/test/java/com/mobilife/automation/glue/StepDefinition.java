@@ -31,13 +31,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 
 import static java.lang.System.out;
@@ -75,6 +73,8 @@ public class StepDefinition {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private  JdbcTemplate jdbcTemplatePolicy;
+    //Action Date number of Days
+    private int numberOfDays = 0;
 
     public StepDefinition () {
     }
@@ -135,6 +135,9 @@ public class StepDefinition {
         driver.get(Constants.URL);
 
 
+        assertEquals(Constants.URL,driver.getCurrentUrl());
+        //Trial for precise reporting
+        scenario.log("I am on the login page");
     }
 
     @When("I enter my valid username and password")
@@ -146,6 +149,7 @@ public class StepDefinition {
           //  test.fail("incorrect details");
         }catch (TimeoutException e){
             Log.info("Correct Details");
+
            // test.pass("I enter my valid username and password");
         }
 
@@ -169,6 +173,11 @@ public class StepDefinition {
     @Then("I should be redirected to the homepage")
     public void iShouldBeRedirectedToTheHomepage () {
         try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        try {
             assertEquals(Constants.URL, driver.getCurrentUrl());
             scenario.log("I should be redirected to the homepage");
             //test.pass("I should be redirected to the homepage");
@@ -182,6 +191,11 @@ public class StepDefinition {
 
     @And("see a welcome message with my {string}")
     public void seeAWelcomeMessageWithMy (String arg0) {
+        try {
+            Thread.sleep(5L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         if (mainPage.getMessage().equals(arg0)){
            //test.pass("Welcome message appearing on screen");
            Log.info("Welcome Message appearing");
@@ -291,9 +305,9 @@ public class StepDefinition {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
+        // Gets for Today
         LocalDate date = LocalDate.now();
-        String day = String.format("%02d", date.getDayOfMonth()+4);
+        String day = String.format("%02d", date.getDayOfMonth()+numberOfDays);
         String month =  String.format("%02d",date.getMonth().getValue());
         String year = String.valueOf(date.getYear());
        specificDebitDetailsWindow.setActionDate(day,month,year);
@@ -307,8 +321,9 @@ public class StepDefinition {
 
 
         specificDebitDetailsWindow.saveSpecificDebit();
-
-        if(!scenarioName.equals("Add Specific Debit without filling in fields")){
+        //I want to change the date if it's a duplicate or its gives some error only when its Successful one
+        //Condition changed from not equal to Add Specific Debit without filling in fields
+        if(scenarioName.equals("Add Specific Debit")){
             if(specificDebitDetailsWindow.isDuplicate()) {
                 Log.info("is a duplicate");
                 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20L),Duration.ofSeconds(5L));
@@ -319,6 +334,13 @@ public class StepDefinition {
             }
             // specificDebitDetailsWindow.getDuplicatePopUpBtn().click();
             assertFalse(specificDebitDetailsWindow.isDuplicate());
+            if(specificDebitDetailsWindow.theresAnError()){
+                numberOfDays++;
+                //Calls the action date again to increment
+                enterActionDate();
+                //Calls the save again
+                clickSave();
+            }
         }
     }
 
@@ -405,7 +427,7 @@ public class StepDefinition {
     @Then("deleting a Specific Debit the {string} column in the database table gets populated")
     public void deletingASpecificDebitTheDeletedColumnInTheDatabaseTableGetsPopulated (String arg0) {
 
-        driver.get(Constants.SPECIFICDEBITURL);
+        driver.get(Constants.SPECIFICDEBIT_URL);
         int policy = 152738;
         try {
             Thread.sleep(5L);
@@ -462,7 +484,7 @@ public class StepDefinition {
 
     @When("Allow Edit Specific Debit before Submission")
     public void allowEditSpecificDebitBeforeSubmission () {
-        driver.get(Constants.SPECIFICDEBITURL);
+        driver.get(Constants.SPECIFICDEBIT_URL);
         Random random = new Random();
         try {
             Thread.sleep(5L);

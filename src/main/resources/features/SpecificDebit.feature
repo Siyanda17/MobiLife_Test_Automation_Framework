@@ -6,6 +6,7 @@ Feature: Specific Debit
   #Make this more dynamic fetch test policies with
   Background: On Mobility
   @Done
+    @SuccessfulScenario
   Scenario: Successful login
     Given I am on the login page
     When I enter my valid username and password

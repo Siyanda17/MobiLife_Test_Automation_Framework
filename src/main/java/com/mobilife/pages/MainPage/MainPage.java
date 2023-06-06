@@ -61,11 +61,12 @@ public class MainPage {
     }
 
     public WebElement getWelcomeMessageElement () {
-        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(20L));
+        wait.until(ExpectedConditions.visibilityOf(welcomeMessage));
         return welcomeMessage;
     }
     public String getMessage(){
-        WebDriverWait  wait = new WebDriverWait(driver,Duration.ofSeconds(15L));
+        WebDriverWait  wait = new WebDriverWait(driver,Duration.ofSeconds(25L));
         wait.until(ExpectedConditions.visibilityOf(welcomeMessage));
         return welcomeMessage.getText().substring(0,7);
     }

@@ -355,4 +355,10 @@ public class SpecificDebitDetailsWindow {
         return contentValue.equals("\\f046");
     }
 
+    /**
+     * Checks if there's an error below the action Textbox
+     * */
+    public boolean theresAnError () {
+        return errorTextUnderActionDate.isEnabled();
+    }
 }
