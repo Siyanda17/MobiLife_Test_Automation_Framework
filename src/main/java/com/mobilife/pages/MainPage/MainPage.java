@@ -8,6 +8,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +22,8 @@ import java.util.concurrent.TimeUnit;
  *
  **/
 public class MainPage {
-    private final WebDriver driver;
+
+    private  WebDriver driver;
 
     public MainPage(){
         driver = DriverSingleton.getDriver();

@@ -41,7 +41,7 @@ Feature: Specific Debit
       When  I Add a Specific Debit
       Then Specific Debit Details window appears
       And Find the policy
-      When  I select the policy
+      Then the policy is "Selected"
       And Click Save
       Then Error message will show below the empty textboxes
 
@@ -60,10 +60,11 @@ Feature: Specific Debit
 
   @Done
     Scenario:  Delete Specific Debit
-      When delete a saved  specific debit before it has been submitted
+      When Allow Edit Specific Debit before Submission
+      And delete a saved  specific debit before it has been submitted
       Then deleting a Specific Debit the 'Deleted' column in the database table gets populated
-
-      And  Cannot delete a specific debit after it has been submitted
+      And  Deny Edit Specific Debit after Submission
+      Then  Cannot delete a specific debit after it has been submitted
 
       #Add specific debit for policy with inactive contract payment Status
 
@@ -71,9 +72,7 @@ Feature: Specific Debit
         When Adding for inactive contract payment status
         Then client contract payment status updates to 'active' and contract payment status reason to 'Client requested'
 
-        @Done
-        Scenario:  Edit Specific Debit
-          When Allow Edit Specific Debit before Submission
-          When Deny Edit Specific Debit after Submission
+
+
 
 

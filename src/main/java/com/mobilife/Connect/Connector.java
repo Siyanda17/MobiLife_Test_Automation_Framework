@@ -1,6 +1,8 @@
 package com.mobilife.Connect;
 
+import com.mobilife.Driver.DriverSingleton;
 import com.mobilife.Utilities.ConfigurationProperties;
+import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,6 +55,9 @@ public class Connector {
     public JdbcTemplate jdbcTemplate() {
         return new JdbcTemplate(dataSource());
     }
-
+//    @Bean
+//    public DriverSingleton driverSingleton(){
+//        return DriverSingleton.getInstance(configurationProperties.getBrowser());
+//    }
 
 }

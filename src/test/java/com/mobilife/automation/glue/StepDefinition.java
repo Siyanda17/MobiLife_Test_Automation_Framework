@@ -54,8 +54,11 @@ import static junit.framework.TestCase.*;
 public class StepDefinition {
     private  WebDriver driver;
     private String scenarioName;
+
     private MainPage  mainPage;
+
     private LoginPage loginPage;
+
     private SpecificDebitPage specificDebitPage;
     private SpecificDebitDetailsWindow specificDebitDetailsWindow;
 
@@ -127,14 +130,7 @@ public class StepDefinition {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            specificDebitPage.searchSpecificDebit("P0054805802LA1");
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
 
-            specificDebitPage.getLatestSpecificDebit();
         }
     }
     @Given("I am on the login page")
@@ -153,13 +149,13 @@ public class StepDefinition {
     public void iEnterMyValidAnd () {
         loginPage.login(Constants.USERNAME, configurationProperties.getPassword());
         try {
-            WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+            WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(15));
             wait.until(ExpectedConditions.alertIsPresent());
-          test.fail("incorrect details");
+            ExtentCucumberAdapter.getCurrentStep().fail("incorrect details");
         }catch (TimeoutException e){
             Log.info("Correct Details");
 
-           test.pass("I enter my valid username and password");
+           ExtentCucumberAdapter.getCurrentStep().pass("I enter my valid username and password");
         }
 
     }
@@ -200,10 +196,8 @@ public class StepDefinition {
 
     @And("see a welcome message with my {string}")
     public void seeAWelcomeMessageWithMy (String arg0) {
-        try
-
-        {
-            Thread.sleep(500L,2);
+        try {
+            Thread.sleep(5000,2);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -243,7 +237,12 @@ public class StepDefinition {
 
     @Then("Specific Debit Details window appears")
     public void specificDebitDetailsWindowAppears () {
-       // specificDebitDetailsWindow.SearchForUniquePolicy("P0054805802LA1");
+        try {
+            sleep(5000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        // specificDebitDetailsWindow.SearchForUniquePolicy("P0054805802LA1");
         //Check if Window Appeared
         if(specificDebitDetailsWindow.getSpecificDebitDetailsWindow().isDisplayed()){
             ExtentCucumberAdapter.getCurrentStep().pass("Specific Debit Details window is appearing");
@@ -255,6 +254,11 @@ public class StepDefinition {
 
     @Then("Find the policy")
     public void findThePolicy () {
+        try {
+            sleep(4000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         String uniqueText = "P0054805802LA1";
         specificDebitDetailsWindow.SearchForUniquePolicy(uniqueText);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
@@ -344,7 +348,7 @@ public class StepDefinition {
 
         for(int i = 1;i < 13;i++){
             try {
-                Thread.sleep(100L);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -414,7 +418,7 @@ public class StepDefinition {
             assertFalse(specificDebitDetailsWindow.isDuplicate());
             if(specificDebitDetailsWindow.theresAnError()){
 
-                numberOfDays++;
+                numberOfDays = numberOfDays+2;
                 specificDebitDetailsWindow.getActionDate().clear();
                 //Calls the action date again to increment
                 enterActionDate();
@@ -503,6 +507,31 @@ public class StepDefinition {
     public void submittedCheckboxTickedAfterTheLinkedCollectionItemIsSubmitted () {
 
     }
+    @When("Allow Edit Specific Debit before Submission")
+    public void allowEditSpecificDebitBeforeSubmission () {
+
+        specificDebitPage.searchSpecificDebit("P0054805802LA1");
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        specificDebitPage.getLatestSpecificDebit();
+//        driver.get(Constants.SPECIFICDEBIT_URL);
+//        Random random = new Random();
+//        try {
+//            Thread.sleep(5L);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+//        String policy = specificDebitPage.getSubmittedPolicies()
+//                .get(random.nextInt(specificDebitPage.getSubmittedPolicies().size()))
+//                .findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[2]"))
+//                .getText();
+//        specificDebitPage.searchSpecificDebit(policy);
+//        specificDebitPage.getAnUnSubmittedPolicy();
+    }
 
     @When("delete a saved  specific debit before it has been submitted")
     public void deleteASavedSpecificDebitBeforeItHasBeenSubmitted () {
@@ -535,30 +564,47 @@ public class StepDefinition {
         SpecificDebitTable deletedSpecific = specificDebitTableObject.get(specificDebitTableObject.size()-1);
         assertEquals(1, deletedSpecific.getDeleted());
     }
+    @When("Deny Edit Specific Debit after Submission")
+    public void denyEditSpecificDebitAfterSubmission () {
+        specificDebitPage.selectSubmittedPolicy();
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
+        String month = specificDebitDetailsWindow.getPremiumMonth().getAttribute("value");
+        specificDebitDetailsWindow.ChoosePremiumMonth("Aug");
+        assertEquals(month,specificDebitDetailsWindow.getPremiumMonth().getAttribute("value"));
+    }
+
 
     @And("Cannot delete a specific debit after it has been submitted")
     public void cannotDeleteASpecificDebitAfterItHasBeenSubmitted () {
-        // Create an instance of the Random class
-        Random random = new Random();
+        try{
+            specificDebitDetailsWindow.deleteSpecificDebit();
+            ExtentCucumberAdapter.getCurrentStep().fail("The specific debit was deleting");
 
-        // Generate a random integer between 0 and 999 (inclusive)
-        try {
-            Thread.sleep(Duration.ofSeconds(10));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        }catch (TimeoutException e){
+            ExtentCucumberAdapter.getCurrentStep().pass("annot delete a specific debit after it has been submitted");
+
         }
-        String policy = specificDebitPage.getSubmittedPolicies()
-                .get(random.nextInt(specificDebitPage.getSubmittedPolicies().size()))
-                .findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[2]"))
-                .getText();
-        out.println(policy);
-        specificDebitPage.searchSpecificDebit(policy);
-        try {
-            Thread.sleep(Duration.ofSeconds(10));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        specificDebitPage.getASubmittedPolicy();
+//        // Create an instance of the Random class
+//        Random random = new Random();
+//
+//        // Generate a random integer between 0 and 999 (inclusive)
+//        try {
+//            Thread.sleep(Duration.ofSeconds(10));
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+//        String policy = specificDebitPage.getSubmittedPolicies()
+//                .get(random.nextInt(specificDebitPage.getSubmittedPolicies().size()))
+//                .findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[2]"))
+//                .getText();
+//        out.println(policy);
+//        specificDebitPage.searchSpecificDebit(policy);
+//        try {
+//            Thread.sleep(Duration.ofSeconds(10));
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+//        specificDebitPage.getASubmittedPolicy();
 
     }
 
@@ -570,26 +616,8 @@ public class StepDefinition {
     public void clientContractPaymentStatusUpdatesToActiveAndContractPaymentStatusReasonToClientRequested () {
     }
 
-    @When("Allow Edit Specific Debit before Submission")
-    public void allowEditSpecificDebitBeforeSubmission () {
-        driver.get(Constants.SPECIFICDEBIT_URL);
-        Random random = new Random();
-        try {
-            Thread.sleep(5L);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        String policy = specificDebitPage.getSubmittedPolicies()
-                .get(random.nextInt(specificDebitPage.getSubmittedPolicies().size()))
-                .findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[2]"))
-                .getText();
-        specificDebitPage.searchSpecificDebit(policy);
-        specificDebitPage.getAnUnSubmittedPolicy();
-    }
 
-    @When("Deny Edit Specific Debit after Submission")
-    public void denyEditSpecificDebitAfterSubmission () {
-    }
+
 
 
     @After(order = 1)

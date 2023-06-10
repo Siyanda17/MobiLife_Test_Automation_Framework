@@ -1,0 +1,29 @@
+Index: src/test/java/com/mobilife/automation/glue/StepDefinition.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/com/mobilife/automation/glue/StepDefinition.java b/src/test/java/com/mobilife/automation/glue/StepDefinition.java
+--- a/src/test/java/com/mobilife/automation/glue/StepDefinition.java	
++++ b/src/test/java/com/mobilife/automation/glue/StepDefinition.java	(date 1686387414497)
+@@ -54,8 +54,11 @@
+ public class StepDefinition {
+     private  WebDriver driver;
+     private String scenarioName;
++
+     private MainPage  mainPage;
++
+     private LoginPage loginPage;
++
+     private SpecificDebitPage specificDebitPage;
+     private SpecificDebitDetailsWindow specificDebitDetailsWindow;
+ 
+@@ -252,7 +255,7 @@
+     @Then("Find the policy")
+     public void findThePolicy () {
+         try {
+-            sleep(5000L);
++            sleep(4000L);
+         } catch (InterruptedException e) {
+             throw new RuntimeException(e);
+         }

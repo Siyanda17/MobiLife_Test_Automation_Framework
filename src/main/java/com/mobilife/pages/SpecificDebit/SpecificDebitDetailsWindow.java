@@ -34,6 +34,7 @@ public class SpecificDebitDetailsWindow {
         initElements(driver, this);
     }
     @FindBy(css = "div[id='SpecificDebitModal'] div[class='modal-content']")
+    @CacheLookup
     private WebElement specificDebitDetailsWindow;
     //Specific Debit Details window
     @FindBy(id = "c18")
@@ -47,15 +48,18 @@ public class SpecificDebitDetailsWindow {
     private WebElement selectPolicy;
 
     @FindBy(xpath = "//input[@id='c20']")
+    @CacheLookup
     private WebElement policyNumber;
 
     @FindBy(id = "c11")
+    @CacheLookup
     private  WebElement premiumMonth;
 
     @FindBy(xpath = "//button[normalize-space()='Done']")
     private WebElement premiumMonthDialogDoneBtn;
 
     @FindBy(id = "c21")
+    @CacheLookup
     private  WebElement collectionMethod;
 
     @FindBy(id = "c10_validationLabel")
@@ -68,12 +72,14 @@ public class SpecificDebitDetailsWindow {
     private WebElement duplicatePopUp;
 
     @FindBy(css = "button[class='swal2-confirm btn btn-primary']")
+    @CacheLookup
     private WebElement duplicatePopUpBtn;
 
     @FindBy(css = "body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div")
     private WebElement Dialog;
 
     @FindBy(css = "div.swal2-actions > button.swal2-confirm.btn.btn-success-green")
+
     private WebElement deleteDialogYes;
 
     @FindBy(css = "div.swal2-actions > button.swal2-cancel.btn.btn-danger")
@@ -88,11 +94,13 @@ public class SpecificDebitDetailsWindow {
 //    }
 
     @FindBy(id ="c10")
+    @CacheLookup
     private WebElement actionDate;
     @FindBy(xpath = "//button[normalize-space()='Done']")
     private  WebElement actionDateDoneBtn;
 
     @FindBy(id = "c12")
+    @CacheLookup
     private WebElement policyAmount;
 
     @FindBy(id = "c13")
@@ -100,9 +108,11 @@ public class SpecificDebitDetailsWindow {
     private WebElement submittedBtn;
 
     @FindBy(css = "#c13 > i")
+    @CacheLookup
     private WebElement submittedCheckbox;
 
     @FindBy(id = "c14")
+    @CacheLookup
     private WebElement notesBox;
 
     @FindBy(id = "c22")
@@ -119,7 +129,7 @@ public class SpecificDebitDetailsWindow {
 
     //Change method to return a Boolean for when we get result
     public void SearchForUniquePolicy(String policy){
-        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(15L));
         wait.until(ExpectedConditions.visibilityOf(searchUniquePolicy));
         searchUniquePolicy.sendKeys(policy);
         findBtn.click();
@@ -147,8 +157,8 @@ public class SpecificDebitDetailsWindow {
      * @param month to set the premium months
      * */
     public void ChoosePremiumMonth(String month){
-        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
-        wait.until(ExpectedConditions.elementToBeClickable(premiumMonth));
+//        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
+//        wait.until(ExpectedConditions.elementToBeClickable(premiumMonth));
         premiumMonth.click();
         Select date = new Select(driver.findElement(By.cssSelector(".ui-datepicker-month")));
         List<WebElement> allSelectedOptions = date.getAllSelectedOptions();
@@ -168,8 +178,8 @@ public class SpecificDebitDetailsWindow {
             default -> -1;
         };
         date.selectByIndex(index);
-        WebDriverWait wait2 = new WebDriverWait(driver, Duration.ofSeconds(5L));
-        wait2.until(ExpectedConditions.elementToBeClickable(premiumMonthDialogDoneBtn));
+//        WebDriverWait wait2 = new WebDriverWait(driver, Duration.ofSeconds(10L));
+//        wait2.until(ExpectedConditions.elementToBeClickable(premiumMonthDialogDoneBtn));
        premiumMonthDialogDoneBtn.click();
     }
 
@@ -313,7 +323,7 @@ public class SpecificDebitDetailsWindow {
     /**
      * Deletes a Specific Debit
      * */
-    public void deleteSpecificDebit(){
+    public void deleteSpecificDebit() throws TimeoutException{
         WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
         wait.until(ExpectedConditions.elementToBeClickable(deleteBtn));
         deleteBtn.click();
@@ -402,4 +412,6 @@ public class SpecificDebitDetailsWindow {
     public WebElement policyDoesNotExist () {
         return Dialog;
     }
+
+
 }

@@ -23,22 +23,22 @@ public class Main {
 
         driver.get("https://mobilife-main-preprod.stratusolvecloud.com/");
 
-      //  main.specificDebitTable = main.jdbcTemplate.queryForObject("SELECT * FROM SpecificDebit", main.specificDebitRowMapper);
-        //System.out.println(main.specificDebitTable.getPolicyAmount());
-        LoginPage loginPage = new LoginPage();
-        loginPage.login(frameworkProperties.getProperty("username"),frameworkProperties.getProperty(Constants.PASSWORD));
-        loginPage.AuthenticateLogin();
-
-        MainPage mainPage = new MainPage();
-        mainPage.GoToSpecificDebitPage();
-        SpecificDebitPage specificDebitPage = new SpecificDebitPage();
-        specificDebitPage.AddSpecificDebit();
-        SpecificDebitDetailsWindow specificDebitDetailsWindow = new SpecificDebitDetailsWindow();
-        specificDebitDetailsWindow.SearchForUniquePolicy("P0054805802LA1");
-
-        specificDebitDetailsWindow.SelectPolicy();
-        specificDebitDetailsWindow.ChoosePremiumMonth("Mar");
-        specificDebitDetailsWindow.setActionDate("25","05","2023");
+//      //  main.specificDebitTable = main.jdbcTemplate.queryForObject("SELECT * FROM SpecificDebit", main.specificDebitRowMapper);
+//        //System.out.println(main.specificDebitTable.getPolicyAmount());
+//        LoginPage loginPage = new LoginPage();
+//        loginPage.login(frameworkProperties.getProperty("username"),frameworkProperties.getProperty(Constants.PASSWORD));
+//        loginPage.AuthenticateLogin();
+//
+//        MainPage mainPage = new MainPage();
+//        mainPage.GoToSpecificDebitPage();
+//        SpecificDebitPage specificDebitPage = new SpecificDebitPage();
+//        specificDebitPage.AddSpecificDebit();
+//        SpecificDebitDetailsWindow specificDebitDetailsWindow = new SpecificDebitDetailsWindow();
+//        specificDebitDetailsWindow.SearchForUniquePolicy("P0054805802LA1");
+//
+//        specificDebitDetailsWindow.SelectPolicy();
+//        specificDebitDetailsWindow.ChoosePremiumMonth("Mar");
+//        specificDebitDetailsWindow.setActionDate("25","05","2023");
 //        specificDebitPage.searchSpecificDebit();
 //        specificDebitPage.getLatestSpecificDebit();
 //        //DriverSingleton.closeObjectInstance();

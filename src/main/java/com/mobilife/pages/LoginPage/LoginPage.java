@@ -67,7 +67,7 @@ public class LoginPage {
      *
      * */
     public void login(String username, String password){
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+       // driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         loginUsername.sendKeys(username);
         loginPassword.sendKeys(password);
         loginButton.click();

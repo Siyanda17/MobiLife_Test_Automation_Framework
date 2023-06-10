@@ -8,6 +8,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -23,7 +24,8 @@ import java.util.concurrent.TimeUnit;
  **/
 
 public class SpecificDebitPage {
-    private final WebDriver driver;
+    @Autowired
+    private  WebDriver driver;
     @FindBy(css = "#c9_searchBox")
     @CacheLookup
     private WebElement searchBox;
@@ -119,7 +121,7 @@ public class SpecificDebitPage {
      * <p>
      * */
     public void AddSpecificDebit(){
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
+      //  driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(15L));
         AddSpecificDebitBtn.click();
 //        WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(15000));
 //        //Specific Debit Details Window will appear
@@ -161,5 +163,34 @@ public class SpecificDebitPage {
             }
 
         }
+    }
+    public void selectSubmittedPolicy () {
+        List<WebElement> rows = getRows();
+       // List<WebElement> submittedPolicies = new ArrayList<>();
+        try {
+            Thread.sleep(6L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        for (WebElement row : rows) {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            String script = "return window.getComputedStyle(arguments[0], '::before').content;";
+
+            WebElement cellElement = row.findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[4]/td[5]/i[1]")); // Replace with appropriate locator for the cell element
+            //String contentValue = (String) js.executeScript(script, cellElement);
+            String contentValue = cellElement.getCssValue("color");
+            System.out.println(contentValue);
+            Log.info(contentValue);
+            //If green then add
+            if(contentValue.equals("rgba(0, 128, 0, 1)")){
+                row.click();
+                break;
+            }
+            // String cellText = cellElement.getText();
+            //   System.out.println("Cell text: " + cellText);
+        }
+
+
     }
 }

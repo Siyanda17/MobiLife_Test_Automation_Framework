@@ -46,7 +46,7 @@ public class DriverSingleton {
     }
 
     public static WebDriver getDriver() {
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        //driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         return driver;
     }
 }

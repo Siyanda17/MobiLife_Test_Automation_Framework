@@ -1,6 +1,7 @@
 package com.mobilife.automation;
 
 
+import com.mobilife.Driver.DriverSingleton;
 import com.mobilife.automation.glue.StepDefinition;
 import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
@@ -32,5 +33,6 @@ public class RunTests  {
     @After
     public void tearDown(){
        // StepDefinition.extent.flush();
+        DriverSingleton.closeObjectInstance();
     }
 }
