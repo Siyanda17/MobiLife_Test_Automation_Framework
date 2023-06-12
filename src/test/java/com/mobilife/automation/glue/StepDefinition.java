@@ -186,7 +186,7 @@ public class StepDefinition {
     @Then("I should be redirected to the homepage")
     public void iShouldBeRedirectedToTheHomepage () {
         try {
-            Thread.sleep(6000);
+            Thread.sleep(Duration.ofSeconds(10));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -198,7 +198,7 @@ public class StepDefinition {
         }catch (AssertionError e){
             //test.fail("Not on the homepage");
             ExtentCucumberAdapter.getCurrentStep().fail("Not on the homepage");
-
+            ExtentCucumberAdapter.getCurrentStep().fail(e.getMessage());
             Log.error("Not on the homepage");
         }
     }
@@ -216,7 +216,8 @@ public class StepDefinition {
         }else {
             Log.error("Welcome Message not appearing");
             ExtentCucumberAdapter.getCurrentStep().fail("No Welcome message appearing on screen");
-            Utils.takeScreenshot(scenario);
+
+            takeScreenshot();
           //  test.fail("No Welcome message appearing on screen");
             assertEquals(arg0,mainPage.getMessage());
 
@@ -715,6 +716,9 @@ public class StepDefinition {
                 wait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getCancelBtn()));
                 ((JavascriptExecutor) driver).executeScript("arguments[0].click();", specificDebitDetailsWindow.getCancelBtn());
                 scenario.log("Close");
+            }
+            if (scenarioName.equals("Delete Specific Debit")){
+                DriverSingleton.closeObjectInstance();
             }
         }
 
