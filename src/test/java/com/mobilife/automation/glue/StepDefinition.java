@@ -169,15 +169,16 @@ public class StepDefinition {
         try{
             loginPage.getOneTimePin().isDisplayed();
 
+            Log.info("Authenticated");
+            ExtentCucumberAdapter.getCurrentStep().pass("click the {string} button");
+            ExtentCucumberAdapter.getCurrentStep().pass("User has been Authenticated");
+
+        }catch (NullPointerException e){
+
             ExtentCucumberAdapter.getCurrentStep().fail("Hasn't Authenticated");
 
             Utils.takeScreenshot(scenario);
             Log.error("not Authenticated");
-
-        }catch (NullPointerException e){
-            Log.info("Authenticated");
-            ExtentCucumberAdapter.getCurrentStep().pass("click the {string} button");
-            ExtentCucumberAdapter.getCurrentStep().pass("User has been Authenticated");
         }
 
     }
@@ -490,7 +491,7 @@ public class StepDefinition {
 
     @And("If it's after {string} Mobility will show an error text")
     public void ifItSAfterMobilityWillShowAnErrorText (String arg0) {
-        LocalTime cutOffTime = LocalTime.of(Integer.parseInt(arg0.substring(0,1)), Integer.parseInt(arg0.substring(3,5)));
+        LocalTime cutOffTime = LocalTime.of(Integer.parseInt(arg0.substring(0,2)), Integer.parseInt(arg0.substring(3,5)));
         out.println(arg0.substring(0,2)+arg0.substring(3,5));
         String inputDate = specificDebitDetailsWindow.
                 getActionDate().
