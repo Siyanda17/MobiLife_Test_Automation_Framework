@@ -631,6 +631,7 @@ public class StepDefinition {
             throw new RuntimeException(e);
         }
         SpecificDebitTable deletedSpecific = specificDebitTableObject.get(specificDebitTableObject.size()-1);
+        Log.info(deletedSpecific.getPremiumMonth());
         assertEquals(1, deletedSpecific.getDeleted());
     }
     @When("Deny Edit Specific Debit after Submission")

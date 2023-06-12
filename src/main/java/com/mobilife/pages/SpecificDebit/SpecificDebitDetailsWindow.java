@@ -104,18 +104,15 @@ public class SpecificDebitDetailsWindow {
     private WebElement submittedCheckbox;
 
     @FindBy(id = "c14")
-    @CacheLookup
     private WebElement notesBox;
 
     @FindBy(id = "c22")
     private WebElement saveBtn;
 
     @FindBy(id = "c23")
-    @CacheLookup
     private WebElement deleteBtn;
 
     @FindBy(xpath = "//button[@type='button'][normalize-space()='Cancel']")
-    @CacheLookup
     private WebElement cancelBtn;
 
     //Change method to return a Boolean for when we get result
@@ -391,7 +388,7 @@ public class SpecificDebitDetailsWindow {
             deleteBtn.isDisplayed();
             Log.info("Delete button is visible");
             return true;
-        }catch (NoSuchElementException e){
+        }catch (NoSuchElementException|StaleElementReferenceException e){
             Log.info("Delete button is not visible");
             return false;
         }
