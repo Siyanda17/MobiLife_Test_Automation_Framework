@@ -191,7 +191,7 @@ public class StepDefinition {
             throw new RuntimeException(e);
         }
         try {
-            assertEquals(Constants.URL, driver.getCurrentUrl());
+            assertEquals(Constants.HOME_URL, driver.getCurrentUrl());
             ExtentCucumberAdapter.getCurrentStep().pass("I should be redirected to the homepage");
             //test.pass("I should be redirected to the homepage");
             Log.info("on the homepage");
@@ -199,6 +199,7 @@ public class StepDefinition {
             //test.fail("Not on the homepage");
             ExtentCucumberAdapter.getCurrentStep().fail("Not on the homepage");
             ExtentCucumberAdapter.getCurrentStep().fail(e.getMessage());
+            Log.error(e.getMessage());
             Log.error("Not on the homepage");
         }
     }
@@ -671,6 +672,7 @@ public class StepDefinition {
             ExtentCucumberAdapter.getCurrentStep().pass("Cannot delete a specific debit after it has been submitted");
 
         }
+        specificDebitDetailsWindow.getCancelBtn().click();
 //        // Create an instance of the Random class
 //        Random random = new Random();
 //
@@ -717,9 +719,10 @@ public class StepDefinition {
                 ((JavascriptExecutor) driver).executeScript("arguments[0].click();", specificDebitDetailsWindow.getCancelBtn());
                 scenario.log("Close");
             }
-            if (scenarioName.equals("Delete Specific Debit")){
-                DriverSingleton.closeObjectInstance();
-            }
+
+        }
+        if (scenarioName.equals("Delete Specific Debit")){
+            DriverSingleton.closeObjectInstance();
         }
 
     }
