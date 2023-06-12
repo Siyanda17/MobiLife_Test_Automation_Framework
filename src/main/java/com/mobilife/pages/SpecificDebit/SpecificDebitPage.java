@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.Thread.sleep;
+
 /**
  * Represents a Specific Debit Page
  *
@@ -27,18 +29,14 @@ public class SpecificDebitPage {
     @Autowired
     private  WebDriver driver;
     @FindBy(css = "#c9_searchBox")
-    @CacheLookup
     private WebElement searchBox;
 
     @FindBy(xpath = "//table[@class='table table-hover table-striped table-bordered mrg-top10']")
-    @CacheLookup
     private WebElement table;
 
     @FindBy(id = "c2")
-    @CacheLookup
     private WebElement AddSpecificDebitBtn ;// = wait.until(ExpectedConditions.elementToBeClickable( By.xpath("//button[@id='c2']")))
     @FindBy(id = "c37")
-    @CacheLookup
     private WebElement importSpecificDebitBtn;
 
     public SpecificDebitPage(){
@@ -81,13 +79,15 @@ public class SpecificDebitPage {
      * @return rows a list of rows from Specific Debit Table
      * */
     private List<WebElement> getRows () {
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOf(table));
         return table.findElements(By.tagName("tr"));
     }
     public List<WebElement> getSubmittedPolicies(){
         List<WebElement> rows = getRows();
         List<WebElement> submittedPolicies = new ArrayList<>();
         try {
-            Thread.sleep(6L);
+            sleep(6L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -130,15 +130,19 @@ public class SpecificDebitPage {
 
     public void getASubmittedPolicy () {
         List<WebElement> rows = getRows();
-        for (WebElement row: rows){
-        WebElement cellElement = row.findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[4]/td[5]/i[1]")); // Replace with appropriate locator for the cell element
+        for (WebElement row : rows){
+
+            WebElement cellElement = row.findElement(By.xpath("//tbody/tr[4]/td[5]/i[1]")); // Replace with appropriate locator for the cell element
         //String contentValue = (String) js.executeScript(script, cellElement);
         String contentValue = cellElement.getCssValue("color");
         System.out.println(contentValue);
             if(contentValue.equals("rgba(0, 128, 0, 1)")){
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+                wait.until(ExpectedConditions.elementToBeClickable(row));
                 row.click();
                 Log.info("Click the row");
                 break;
+                //break;
             }
 
         }
@@ -147,12 +151,12 @@ public class SpecificDebitPage {
     public void getAnUnSubmittedPolicy () {
         List<WebElement> rows = getRows();
         for (WebElement row: rows){
-            try {
-                Thread.sleep(Duration.ofSeconds(10));
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            WebElement cellElement = row.findElement(By.xpath("//body[1]/div[7]/div[2]/form[1]/div[5]/div[1]/div[1]/div[2]/div[1]/div[1]/table[1]/tbody[1]/tr[4]/td[5]/i[1]")); // Replace with appropriate locator for the cell element
+//            try {
+//                Thread.sleep(Duration.ofSeconds(10));
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+            WebElement cellElement = row.findElement(By.cssSelector("tbody tr:nth-child(4) td:nth-child(5)")); // Replace with appropriate locator for the cell element
             //String contentValue = (String) js.executeScript(script, cellElement);
             String contentValue = cellElement.getCssValue("color");
             System.out.println(contentValue);
@@ -168,7 +172,7 @@ public class SpecificDebitPage {
         List<WebElement> rows = getRows();
        // List<WebElement> submittedPolicies = new ArrayList<>();
         try {
-            Thread.sleep(6L);
+            sleep(6L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -184,7 +188,9 @@ public class SpecificDebitPage {
             Log.info(contentValue);
             //If green then add
             if(contentValue.equals("rgba(0, 128, 0, 1)")){
+                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5L));
                 row.click();
+                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5L));
                 break;
             }
             // String cellText = cellElement.getText();

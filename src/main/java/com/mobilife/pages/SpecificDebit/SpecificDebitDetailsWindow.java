@@ -38,10 +38,8 @@ public class SpecificDebitDetailsWindow {
     private WebElement specificDebitDetailsWindow;
     //Specific Debit Details window
     @FindBy(id = "c18")
-    @CacheLookup
     private WebElement searchUniquePolicy;
     @FindBy(id = "c19")
-    @CacheLookup
     private WebElement findBtn;
     @FindBy(css = ".badge.badge-success.pull-right.item-badge")
     @CacheLookup
@@ -52,14 +50,12 @@ public class SpecificDebitDetailsWindow {
     private WebElement policyNumber;
 
     @FindBy(id = "c11")
-    @CacheLookup
     private  WebElement premiumMonth;
 
     @FindBy(xpath = "//button[normalize-space()='Done']")
     private WebElement premiumMonthDialogDoneBtn;
 
     @FindBy(id = "c21")
-    @CacheLookup
     private  WebElement collectionMethod;
 
     @FindBy(id = "c10_validationLabel")
@@ -72,7 +68,6 @@ public class SpecificDebitDetailsWindow {
     private WebElement duplicatePopUp;
 
     @FindBy(css = "button[class='swal2-confirm btn btn-primary']")
-    @CacheLookup
     private WebElement duplicatePopUpBtn;
 
     @FindBy(css = "body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div")
@@ -94,21 +89,18 @@ public class SpecificDebitDetailsWindow {
 //    }
 
     @FindBy(id ="c10")
-    @CacheLookup
     private WebElement actionDate;
     @FindBy(xpath = "//button[normalize-space()='Done']")
     private  WebElement actionDateDoneBtn;
 
     @FindBy(id = "c12")
-    @CacheLookup
     private WebElement policyAmount;
 
     @FindBy(id = "c13")
-    @CacheLookup
+
     private WebElement submittedBtn;
 
     @FindBy(css = "#c13 > i")
-    @CacheLookup
     private WebElement submittedCheckbox;
 
     @FindBy(id = "c14")
@@ -116,7 +108,6 @@ public class SpecificDebitDetailsWindow {
     private WebElement notesBox;
 
     @FindBy(id = "c22")
-    @CacheLookup
     private WebElement saveBtn;
 
     @FindBy(id = "c23")
@@ -383,6 +374,27 @@ public class SpecificDebitDetailsWindow {
 
     public WebElement getCancelBtn () {
         return cancelBtn;
+    }
+    public Boolean isSaveButtonVisible(){
+        try{
+            saveBtn.isDisplayed();
+            Log.info("Save button is visible");
+            return true;
+        }catch (NoSuchElementException e){
+            Log.info("Save button is not visible");
+            return false;
+        }
+
+    }
+    public Boolean isDeleteButtonVisible(){
+        try{
+            deleteBtn.isDisplayed();
+            Log.info("Delete button is visible");
+            return true;
+        }catch (NoSuchElementException e){
+            Log.info("Delete button is not visible");
+            return false;
+        }
     }
     public Boolean isThereASubmittedCheckMark(){
         JavascriptExecutor js = (JavascriptExecutor) driver;

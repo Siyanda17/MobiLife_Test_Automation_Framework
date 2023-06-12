@@ -8,6 +8,7 @@ import io.cucumber.junit.CucumberOptions;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.runner.RunWith;
 
 
@@ -30,8 +31,8 @@ public class RunTests  {
      * @DataProvider(parallel = true) public Object[][] scenarios() {
      * System.out.println("PARALLEL"); return super.scenarios(); }
      */
-    @After
-    public void tearDown(){
+    @AfterAll
+    public static void tearDown (){
        // StepDefinition.extent.flush();
         DriverSingleton.closeObjectInstance();
     }
