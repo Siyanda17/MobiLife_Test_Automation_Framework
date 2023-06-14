@@ -334,14 +334,14 @@ public class SpecificDebitDetailsWindow {
      * Clicks Save button
      * */
     public void saveSpecificDebit(){
-        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(5L));
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(2));
         wait.until(ExpectedConditions.elementToBeClickable(saveBtn));
         saveBtn.click();
     }
     public Boolean isDuplicate(){
         boolean isDuplicate;
         try {
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20L));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
             wait.until(ExpectedConditions.visibilityOf(duplicatePopUp));
            // boolean isDisplayed = duplicatePopUp.isDisplayed();
             //assertTrue(duplicatePopUp.isDisplayed());

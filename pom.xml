@@ -136,6 +136,11 @@
             <version>5.10.0-M1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.webdriver</groupId>
+            <artifactId>webdriver-chrome</artifactId>
+            <version>0.9.7376</version>
+        </dependency>
 
     </dependencies>
 <!--    <build>-->

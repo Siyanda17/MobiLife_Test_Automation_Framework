@@ -31,6 +31,7 @@ Feature: Specific Debit
   Scenario: Action Date
       # Action date cannot be in the past(Past dates on the date picker are greyed out)
       # Action date should not be a non collection day(weekend days and holidays should be greyed out)
+    Then Enter a Weekend Action Date and in the past
     Then Enter Action Date
     And If it's after "14:30" Mobility will show an error text
 

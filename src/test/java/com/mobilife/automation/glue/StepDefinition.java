@@ -36,6 +36,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -175,7 +176,7 @@ public class StepDefinition {
             loginPage.getOneTimePin().isDisplayed();
 
             Log.info("Authenticated");
-            ExtentCucumberAdapter.getCurrentStep().pass("click the {string} button");
+            ExtentCucumberAdapter.getCurrentStep().pass("click login button");
             ExtentCucumberAdapter.getCurrentStep().pass("User has been Authenticated");
 
         }catch (NullPointerException e){
@@ -420,9 +421,9 @@ public class StepDefinition {
     @And("Premium Month date picker translates to MM\\/YY")
     public void premiumMonthDatePickerTranslatesToMMYY () {
 
-        for(int i = 1;i < 13;i++){
+        for(int i = 1;i < 7;i++){
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -511,14 +512,25 @@ public class StepDefinition {
         if(scenarioName.equals("Add Specific Debit")){
             if(specificDebitDetailsWindow.isDuplicate()) {
                 Log.info("is a duplicate");
-                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20),Duration.ofSeconds(5));
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10),Duration.ofSeconds(2));
                 wait.until(ExpectedConditions.elementToBeClickable(specificDebitDetailsWindow.getDuplicatePopUpBtn()));
+                try{
+                    specificDebitDetailsWindow.getDuplicatePopUp().isDisplayed();
+                    ExtentCucumberAdapter.getCurrentStep().pass("The Duplicate Alert Apppears When there is a Duplicate");
+                }catch (NoSuchElementException e){
+                    ExtentCucumberAdapter.getCurrentStep().fail("The Duplicate is not Appearing ");
+                    takeScreenshot();
+                }
                 // Execute JavaScript code to click the button
                 JavascriptExecutor js = (JavascriptExecutor) driver;
                 js.executeScript("document.querySelector(\"div.swal2-actions > button.swal2-confirm.btn.btn-primary\").click();");
+
+                specificDebitDetailsWindow.ChoosePremiumMonth("Jun");
             }
+
             // specificDebitDetailsWindow.getDuplicatePopUpBtn().click();
             assertFalse(specificDebitDetailsWindow.isDuplicate());
+            //If we can't action the date
             if(specificDebitDetailsWindow.theresAnError()){
 
                 numberOfDays = numberOfDays+2;
@@ -550,14 +562,21 @@ public class StepDefinition {
         if(LocalTime.now().isAfter(cutOffTime) &&
                         date.equals(LocalDate.now())){//Get the Error Text
             Wait<WebDriver> fluentWait = new FluentWait<>(driver)
-                    .withTimeout(Duration.ofSeconds(10L))
+                    .withTimeout(Duration.ofSeconds(5L))
                     .pollingEvery(Duration.ofSeconds(2L))
                     .ignoring(NoSuchElementException.class,TimeoutException.class);
             fluentWait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getErrorTextUnderActionDate()));
             //Implement after 14:30
-            String expected = "";
+            String expected = "Cutoff time is 14:30 - Please choose tomorrow or later";
             String actualText = specificDebitDetailsWindow.getErrorTextUnderActionDate().getText();
-            assertTrue("Error text",specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());
+            try {
+                assertEquals(expected,actualText);
+                assertTrue("Error text",specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());
+                ExtentCucumberAdapter.getCurrentStep().pass("the error for cutoff time is showing");
+            }catch (AssertionError e){
+                ExtentCucumberAdapter.getCurrentStep().fail("The Cutoff time error is not showing");
+                takeScreenshot();
+            }
 
         }
 
@@ -577,7 +596,7 @@ public class StepDefinition {
     public void errorMessageWillShowBelowTheEmptyTextboxes () {
         if(specificDebitDetailsWindow.getPremiumMonth().getText().isEmpty()){
             try {
-                Thread.sleep(4000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -586,7 +605,7 @@ public class StepDefinition {
 
         if(specificDebitDetailsWindow.getActionDate().getText().isEmpty()){
             try {
-                Thread.sleep(4000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -622,7 +641,7 @@ public class StepDefinition {
 
         specificDebitPage.searchSpecificDebit("P0054805802LA1");
         try {
-            Thread.sleep(3000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -699,7 +718,7 @@ public class StepDefinition {
 
         specificDebitPage.getLatestSpecificDebit();
         try {
-            Thread.sleep(Duration.ofSeconds(10));
+            Thread.sleep(Duration.ofSeconds(5));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -781,4 +800,44 @@ public class StepDefinition {
     }
 
 
-}
+    @Then("Enter a Weekend Action Date and in the past")
+    public void enterAWeekendActionDateAndInThePast () {
+        specificDebitDetailsWindow.ChoosePremiumMonth("Aug");
+        LocalDate date = LocalDate.now();  // Get the current date
+        int days = 7;
+
+        for(int i = 0; i<days;i++){
+            date.plusDays(i);
+            // Check if the day of the week is either Saturday or Sunday
+            if (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                String day = String.format("%02d", date.getDayOfMonth()+numberOfDays);
+                String month =  String.format("%02d",date.getMonth().getValue());
+                String year = String.valueOf(date.getYear());
+                specificDebitDetailsWindow.setActionDate(day,month,year);
+                //We have to save first to observe the error codes
+                specificDebitDetailsWindow.saveSpecificDebit();
+                try {
+                    sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                try{
+                    assertTrue(specificDebitDetailsWindow.theresAnError());
+                    ExtentCucumberAdapter.getCurrentStep().pass("The error is appearing");
+                }catch (NoSuchElementException e){
+                    takeScreenshot();
+                    ExtentCucumberAdapter.getCurrentStep().fail("The Error warning about weekend Specific Debits is not appearing");
+                }
+                //Clear Text field for next steps
+                specificDebitDetailsWindow.getPremiumMonth().clear();
+                specificDebitDetailsWindow.getActionDate().clear();
+                System.out.println("It's the weekend!");
+                break;
+            }
+
+        }
+
+    }
+
+    }
+

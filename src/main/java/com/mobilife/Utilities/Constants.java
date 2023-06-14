@@ -23,7 +23,7 @@ public class Constants {
 
     public static  final String INCORRECT_POLICY = "Incorrect policy";
     public static final int TIMEOUT = 15;
-    public static final int STEP_RETRY = 2;
+    public static final int STEP_RETRY = 3;
     public static final String PASSWORD = "password";
 
     public static final String DATABASE_HOST = "databaseHost";
