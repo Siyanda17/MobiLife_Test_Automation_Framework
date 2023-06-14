@@ -23,6 +23,7 @@ Feature: Specific Debit
     Then Specific Debit Details window appears
     And Find the policy
     Then the policy is "Selected"
+    And Buttons "Save" and "Cancel" Appear an the bottom
     And Click Save
     Then Error message will show below the empty textboxes
 

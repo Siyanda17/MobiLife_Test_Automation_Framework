@@ -277,6 +277,14 @@ public class SpecificDebitDetailsWindow {
         return notesBox;
     }
 
+    public WebElement getSaveBtn () {
+        return saveBtn;
+    }
+
+    public WebElement getDeleteBtn () {
+        return deleteBtn;
+    }
+
     public WebElement getDuplicatePopUp () {
         return duplicatePopUp;
     }
@@ -425,6 +433,11 @@ public class SpecificDebitDetailsWindow {
 
     public WebElement policyDoesNotExist () {
         return Dialog;
+    }
+
+
+    public boolean isCancelButtonVisible() throws NoSuchElementException {
+        return cancelBtn.isDisplayed();
     }
 
 

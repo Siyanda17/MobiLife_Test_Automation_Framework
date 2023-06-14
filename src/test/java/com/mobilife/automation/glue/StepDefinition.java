@@ -26,6 +26,7 @@ import com.mobilife.pages.LoginPage.LoginPage;
 import com.mobilife.pages.MainPage.MainPage;
 import com.mobilife.pages.SpecificDebit.SpecificDebitDetailsWindow;
 import com.mobilife.pages.SpecificDebit.SpecificDebitPage;
+import org.checkerframework.checker.units.qual.A;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -360,11 +361,46 @@ public class StepDefinition {
 
         Log.info(scenarioName+ ": Select Policy");
     }
+    @And("Buttons {string} and {string} Appear an the bottom")
+    public void buttonsAndAppearAnTheBottom (String arg0, String arg1) {
+        try {
+            Thread.sleep(2000);
+
+        } catch (InterruptedException e) {
+
+            e.printStackTrace();
+        }
+        //Save Button Validation
+        try {
+            assertTrue(specificDebitDetailsWindow.isSaveButtonVisible());
+            Log.info(specificDebitDetailsWindow.getSaveBtn().getText());
+            Log.info(arg0);
+            assertEquals(arg0,specificDebitDetailsWindow.getSaveBtn().getText());
+            ExtentCucumberAdapter.getCurrentStep().pass(arg0+" Button is appearing is Appearing");
+        }catch (AssertionError|NoSuchElementException e){
+            takeScreenshot();
+            Log.error("Button not showing");
+            ExtentCucumberAdapter.getCurrentStep().fail(arg0+" Button is not appearing on the window");
+
+        }
+        //Cancel Button Validation
+        try {
+            assertTrue(specificDebitDetailsWindow.isCancelButtonVisible());
+            assertEquals(arg1,specificDebitDetailsWindow.getCancelBtn().getText());
+            ExtentCucumberAdapter.getCurrentStep().pass(arg1+" Button is appearing");
+
+        }catch (AssertionError|NoSuchElementException e){
+            takeScreenshot();
+            Log.error("Button not showing");
+            ExtentCucumberAdapter.getCurrentStep().fail(arg1+" Button is not appearing on specific debit window");
+
+        }
+    }
 
     @Then("Policy number filed is populated")
     public void policyNumberFiledIsPopulated () {
         try {
-            Thread.sleep(10000L);
+            Thread.sleep(2000);
 
         } catch (InterruptedException e) {
 
@@ -478,6 +514,54 @@ public class StepDefinition {
     public void nettPremiumCannotBeNegative () {
         specificDebitDetailsWindow.setPolicyAmount("-");
         assertFalse(specificDebitDetailsWindow.getPremiumMonth().getAttribute("value").contains("-"));
+    }
+
+    @Then("Enter a Weekend Action Date and in the past")
+    public void enterAWeekendActionDateAndInThePast () {
+        specificDebitDetailsWindow.ChoosePremiumMonth("Aug");
+        LocalDate date = LocalDate.now();  // Get the current date
+        long days = 7;
+
+        for(long i = 0; i < days;i++){
+            final LocalDate date1 = date.plusDays(i);
+            Log.info(String.valueOf(i));
+            Log.info(date.toString());
+            Log.info("Day of th week "+date1);
+            // Check if the day of the week is either Saturday or Sunday
+            if (date1.getDayOfWeek() == DayOfWeek.SATURDAY || date1.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                String day = String.format("%02d", date1.getDayOfMonth());
+                String month =  String.format("%02d",date1.getMonth().getValue());
+                String year = String.valueOf(date1.getYear());
+                Log.info("Its the weekend");
+                specificDebitDetailsWindow.setActionDate(day,month,year);
+                //We have to save first to observe the error codes
+                specificDebitDetailsWindow.saveSpecificDebit();
+                try {
+                    sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                try{
+                    assertTrue(specificDebitDetailsWindow.theresAnError());
+                    ExtentCucumberAdapter.getCurrentStep().pass("The error is appearing");
+                }catch (AssertionError e){
+                    takeScreenshot();
+                    ExtentCucumberAdapter.getCurrentStep().fail("The Error warning about weekend Specific Debits is not appearing");
+                }
+                try {
+                    sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                //Clear Text field for next steps
+                specificDebitDetailsWindow.getPremiumMonth().clear();
+                specificDebitDetailsWindow.getActionDate().clear();
+                System.out.println("It's the weekend!");
+                break;
+            }
+
+        }
+
     }
 
     @Then("Enter Action Date")
@@ -600,7 +684,16 @@ public class StepDefinition {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            assertTrue(specificDebitDetailsWindow.getErrorTextUnderPremiumMonth().isDisplayed());
+
+            try {
+                //Checks if Error is Appearing
+                assertTrue(specificDebitDetailsWindow.getErrorTextUnderPremiumMonth().isDisplayed());
+                ExtentCucumberAdapter.getCurrentStep().pass("Error Under Premium month is appearing as expected");
+            }catch (AssertionError|NoSuchElementException e){
+                takeScreenshot();
+                ExtentCucumberAdapter.getCurrentStep().fail("Error Under Premium month is not appearing");
+            }
+
         }
 
         if(specificDebitDetailsWindow.getActionDate().getText().isEmpty()){
@@ -609,7 +702,14 @@ public class StepDefinition {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            assertTrue(specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());
+            try {
+                //Checks if Error is Appearing
+                assertTrue(specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());
+                ExtentCucumberAdapter.getCurrentStep().pass("Error Under Premium month is appearing as expected");
+            }catch (AssertionError|NoSuchElementException e){
+                takeScreenshot();
+                ExtentCucumberAdapter.getCurrentStep().fail("Error Under Premium month is not appearing");
+            }
         }
     }
 
@@ -622,7 +722,16 @@ public class StepDefinition {
 
     @And("Cannot tick Submitted checkbox")
     public void cannotTickSubmittedCheckbox () {
-       assertFalse(specificDebitDetailsWindow.getSubmittedBtn().isEnabled());
+        try {
+            assertFalse(specificDebitDetailsWindow.getSubmittedBtn().isEnabled());
+            ExtentCucumberAdapter.getCurrentStep().pass("The Submit Button is disabled as expected");
+        }catch (AssertionError|NoSuchElementException e){
+            takeScreenshot();
+            specificDebitDetailsWindow.getSubmittedBtn().click();
+            ExtentCucumberAdapter.getCurrentStep().fail("The Submit Button should not be enabled");
+            Log.error(e.getMessage());
+        }
+
     }
 
     @And("Can add notes")
@@ -632,10 +741,7 @@ public class StepDefinition {
         //specificDebitDetailsWindow.getCancelBtn();
     }
 
-    @Then("Submitted checkbox ticked after the linked collection item is submitted")
-    public void submittedCheckboxTickedAfterTheLinkedCollectionItemIsSubmitted () {
 
-    }
     @When("Allow Edit Specific Debit before Submission")
     public void allowEditSpecificDebitBeforeSubmission () {
 
@@ -726,6 +832,17 @@ public class StepDefinition {
         specificDebitDetailsWindow.ChoosePremiumMonth("Aug");
       assertFalse(specificDebitDetailsWindow.isSaveButtonVisible());
     }
+    @Then("Submitted checkbox ticked after the linked collection item is submitted")
+    public void submittedCheckboxTickedAfterTheLinkedCollectionItemIsSubmitted () {//More Code to be added (Database Validation)
+        try{
+            assertTrue(specificDebitDetailsWindow.isThereASubmittedCheckMark());
+            ExtentCucumberAdapter.getCurrentStep().pass("The is a check mark for a Submitted specific debit as expected");
+        }catch (AssertionError e){
+            takeScreenshot();
+            ExtentCucumberAdapter.getCurrentStep().fail("There is no check mark for this Submitted policy");
+        }
+
+    }
 
 
     @And("Cannot delete a specific debit after it has been submitted")
@@ -800,44 +917,6 @@ public class StepDefinition {
     }
 
 
-    @Then("Enter a Weekend Action Date and in the past")
-    public void enterAWeekendActionDateAndInThePast () {
-        specificDebitDetailsWindow.ChoosePremiumMonth("Aug");
-        LocalDate date = LocalDate.now();  // Get the current date
-        int days = 7;
 
-        for(int i = 0; i<days;i++){
-            date.plusDays(i);
-            // Check if the day of the week is either Saturday or Sunday
-            if (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY) {
-                String day = String.format("%02d", date.getDayOfMonth()+numberOfDays);
-                String month =  String.format("%02d",date.getMonth().getValue());
-                String year = String.valueOf(date.getYear());
-                specificDebitDetailsWindow.setActionDate(day,month,year);
-                //We have to save first to observe the error codes
-                specificDebitDetailsWindow.saveSpecificDebit();
-                try {
-                    sleep(2000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                try{
-                    assertTrue(specificDebitDetailsWindow.theresAnError());
-                    ExtentCucumberAdapter.getCurrentStep().pass("The error is appearing");
-                }catch (NoSuchElementException e){
-                    takeScreenshot();
-                    ExtentCucumberAdapter.getCurrentStep().fail("The Error warning about weekend Specific Debits is not appearing");
-                }
-                //Clear Text field for next steps
-                specificDebitDetailsWindow.getPremiumMonth().clear();
-                specificDebitDetailsWindow.getActionDate().clear();
-                System.out.println("It's the weekend!");
-                break;
-            }
-
-        }
-
-    }
-
-    }
+}
 
