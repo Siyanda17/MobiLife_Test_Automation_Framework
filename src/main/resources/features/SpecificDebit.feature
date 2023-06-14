@@ -15,10 +15,35 @@ Feature: Specific Debit
     And see a welcome message with my "Welcome"
 
 
-    @Done
+      #Detect Duplicate Specific Debits
+  @Done
+  Scenario: Add Specific Debit without filling in fields
+    Given I am on Specific Debit Tab
+    When  I Add a Specific Debit
+    Then Specific Debit Details window appears
+    And Find the policy
+    Then the policy is "Selected"
+    And Click Save
+    Then Error message will show below the empty textboxes
+
+
+  @Done
+  Scenario: Action Date
+      # Action date cannot be in the past(Past dates on the date picker are greyed out)
+      # Action date should not be a non collection day(weekend days and holidays should be greyed out)
+    Then Enter Action Date
+    And If it's after "14:30" Mobility will show an error text
+
+  @Done
+  Scenario: Check Submitted
+    When  Submitted checkbox empty(no tick) before the linked collection item is Submitted
+    And Cannot tick Submitted checkbox
+    And Can add notes
+
+
+  @Done
     @SuccessfulScenario
     Scenario: Add Specific Debit
-      Given I am on Specific Debit Tab
       When I Add a Specific Debit
       Then Specific Debit Details window appears
       Then Find the policy
@@ -33,30 +58,10 @@ Feature: Specific Debit
       #If it after 14:30  Mobility will not allow to create for today
       Then  Enter Action Date
       Then Click Save
-      And If it's after "14:30" Mobility will show an error text
 
-      #Detect Duplicate Specific Debits
-    @Done
-    Scenario: Add Specific Debit without filling in fields
-      When  I Add a Specific Debit
-      Then Specific Debit Details window appears
-      And Find the policy
-      Then the policy is "Selected"
-      And Click Save
-      Then Error message will show below the empty textboxes
 
-      @Done
-    Scenario: Action Date
-      # Action date cannot be in the past(Past dates on the date picker are greyed out)
-      # Action date should not be a non collection day(weekend days and holidays should be greyed out)
-      Then Enter Action Date
 
-    @Done
-    Scenario: Check Submitted
-      When  Submitted checkbox empty(no tick) before the linked collection item is Submitted
-      And Cannot tick Submitted checkbox
-      And Can add notes
-      Then Submitted checkbox ticked after the linked collection item is submitted
+
 
   @Done
     Scenario:  Delete Specific Debit
@@ -64,6 +69,7 @@ Feature: Specific Debit
       And delete a saved  specific debit before it has been submitted
       Then deleting a Specific Debit the 'Deleted' column in the database table gets populated
       And  Deny Edit Specific Debit after Submission
+      Then Submitted checkbox ticked after the linked collection item is submitted
       Then  Cannot delete a specific debit after it has been submitted
 
       #Add specific debit for policy with inactive contract payment Status

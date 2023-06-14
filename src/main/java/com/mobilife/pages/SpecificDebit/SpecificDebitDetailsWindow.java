@@ -117,13 +117,18 @@ public class SpecificDebitDetailsWindow {
 
     //Change method to return a Boolean for when we get result
     public void SearchForUniquePolicy(String policy){
-        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(15L));
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
         wait.until(ExpectedConditions.visibilityOf(searchUniquePolicy));
         searchUniquePolicy.sendKeys(policy);
         findBtn.click();
 
 
     }
+
+    public WebElement getSearchUniquePolicy () {
+        return searchUniquePolicy;
+    }
+
     /**
      * Sets the Policy amount on the Specific Debit Page
      * */
@@ -329,7 +334,7 @@ public class SpecificDebitDetailsWindow {
      * Clicks Save button
      * */
     public void saveSpecificDebit(){
-        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(5L));
         wait.until(ExpectedConditions.elementToBeClickable(saveBtn));
         saveBtn.click();
     }

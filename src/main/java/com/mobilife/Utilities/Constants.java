@@ -19,6 +19,9 @@ public class Constants {
     public static final String URL = "https://mobilife-main-preprod.stratusolvecloud.com/";
     public static final String LOGIN_URL = "https://mobilife-main-preprod.stratusolvecloud.com/UserManagement/login/";
     public static final String SPECIFICDEBIT_URL = "https://mobilife-policies-preprod.stratusolvecloud.com/App/MobiLifeAdmin/SpecificDebit_Overview/";
+    public static final String HOME_URL = "https://mobilife-main-preprod.stratusolvecloud.com/App/MobiLifeAdmin/" ;
+
+    public static  final String INCORRECT_POLICY = "Incorrect policy";
     public static final int TIMEOUT = 15;
     public static final int STEP_RETRY = 2;
     public static final String PASSWORD = "password";

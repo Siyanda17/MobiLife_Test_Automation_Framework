@@ -70,9 +70,6 @@ public class StepDefinition {
     private final RowMapper<PolicyTable> policyTableRowMapper = new PolicyRowMapper();
     private Scenario scenario;
 
-    static ExtentReports extent;
-    ExtentSparkReporter spark = new ExtentSparkReporter("Specific_Debit_Regression_Report.html");
-    private ExtentTest test;
     private int retry_count = 0;
 
 
@@ -117,22 +114,30 @@ public class StepDefinition {
 
         Log.getLogData(Log.class.getName());
         Log.startTest(scenarioName);
-        test = ExtentCucumberAdapter.getCurrentScenario();
+      //  test = ExtentCucumberAdapter.getCurrentScenario();
         scenario.log(scenarioName);
 
 //        test = extent.createTest(scenarioName).assignAuthor("Yakhuxolo Mxabo")
 //                .assignCategory("Specific Debit Regression").assignDevice(configurationProperties.getBrowser());
 
         driver = DriverSingleton.getDriver();
-
-        if (scenarioName.equals("Delete Specific Debit")) {
+//
+//        if (scenarioName.equals("Delete Specific Debit")) {
+//            specificDebitDetailsWindow.getCancelBtn().click();
+//            try {
+//                Thread.sleep(4000);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//
+//        }
+        if(scenarioName.equals("Add Specific Debit")){
             specificDebitDetailsWindow.getCancelBtn().click();
             try {
-                Thread.sleep(5000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-
         }
     }
     @Given("I am on the login page")
@@ -267,14 +272,17 @@ public class StepDefinition {
 
     @Then("Find the policy")
     public void findThePolicy () {
+        String uniqueText = "P0054805802LA1";
+        if(!scenarioName.equals("Add Specific Debit without filling in fields")){
         try {
-            sleep(4000L);
+            sleep(3000L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        String uniqueText = "P0054805802LA1";
+        //Policy
+
         specificDebitDetailsWindow.SearchForUniquePolicy(uniqueText);
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5L));
 
 
         assertEquals(uniqueText,policyTableObject.getUniquePolicyNumber());
@@ -283,9 +291,12 @@ public class StepDefinition {
 
             specificDebitDetailsWindow.policyDoesNotExist().isDisplayed() ;
             ExtentCucumberAdapter.getCurrentStep().fail("The policy was not found");
+            takeScreenshot();
+            Log.error("Policy was not found");
             //This retries to find the policy in case of a not found error
             if(retry_count>Constants.STEP_RETRY){
                 findThePolicy();
+                retry_count++;
             }
 
 
@@ -296,13 +307,45 @@ public class StepDefinition {
 
         }
         Log.info(policyTableObject.getUniquePolicyNumber());
+        }
+        else{// Test if mobility can differentiate if the policy is not registered
+            try {
+                sleep(3000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            //policy
+            specificDebitDetailsWindow.SearchForUniquePolicy(Constants.INCORRECT_POLICY);
+            try {
+                sleep(2000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            try{
+                specificDebitDetailsWindow.policyDoesNotExist().isDisplayed() ;
+                ExtentCucumberAdapter.getCurrentStep().pass("The Policy not found Dialog pops up");
+
+                // Execute JavaScript code to click the button
+                JavascriptExecutor js = (JavascriptExecutor) driver;
+                js.executeScript("document.querySelector(\"button[class='swal2-confirm btn btn-info swal2-styled']\").click();");
+
+                specificDebitDetailsWindow.getSearchUniquePolicy().clear();
+                specificDebitDetailsWindow.SearchForUniquePolicy(uniqueText);
+            }catch (NoSuchElementException e){
+                ExtentCucumberAdapter.getCurrentStep().fail("The Policy not found Dialog is not popping up");
+                takeScreenshot();
+
+            }
+
+        }
     }
 
     @When("the policy is {string}")
     public void iSelectThePolicy (String arg0) {
         specificDebitDetailsWindow.SelectPolicy();
 
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5L));
 
         if(specificDebitDetailsWindow.getSelectBadge().getText().equals(arg0)){
 
@@ -450,6 +493,9 @@ public class StepDefinition {
         String year = String.valueOf(date.getYear());
        specificDebitDetailsWindow.setActionDate(day,month,year);
         assertNotNull(specificDebitDetailsWindow.getActionDate().getAttribute("value"));
+        if(scenarioName.equals(" Action Date")){
+            specificDebitDetailsWindow.saveSpecificDebit();
+        }
 
     }
 
@@ -504,14 +550,17 @@ public class StepDefinition {
         if(LocalTime.now().isAfter(cutOffTime) &&
                         date.equals(LocalDate.now())){//Get the Error Text
             Wait<WebDriver> fluentWait = new FluentWait<>(driver)
-                    .withTimeout(Duration.ofSeconds(20))
-                    .pollingEvery(Duration.ofSeconds(2))
+                    .withTimeout(Duration.ofSeconds(10L))
+                    .pollingEvery(Duration.ofSeconds(2L))
                     .ignoring(NoSuchElementException.class,TimeoutException.class);
             fluentWait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getErrorTextUnderActionDate()));
+            //Implement after 14:30
+            String expected = "";
             String actualText = specificDebitDetailsWindow.getErrorTextUnderActionDate().getText();
             assertTrue("Error text",specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());
 
         }
+
 
     }
 
