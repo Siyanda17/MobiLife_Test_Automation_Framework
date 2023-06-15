@@ -276,44 +276,48 @@ public class StepDefinition {
     public void findThePolicy () {
         String uniqueText = "P0054805802LA1";
         if(!scenarioName.equals("Add Specific Debit without filling in fields")){
-        try {
-            sleep(3000L);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        //Policy
+            try {
+                sleep(3000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+                }
+            //Policy
 
-        specificDebitDetailsWindow.SearchForUniquePolicy(uniqueText);
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5L));
+            specificDebitDetailsWindow.SearchForUniquePolicy(uniqueText);
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5L));
 
 
-        assertEquals(uniqueText,policyTableObject.getUniquePolicyNumber());
-        ExtentCucumberAdapter.getCurrentStep().pass("Policy Exists on the database");
-        try {
+            assertEquals(uniqueText,policyTableObject.getUniquePolicyNumber());
+            ExtentCucumberAdapter.getCurrentStep().pass("Policy Exists on the database");
 
-            specificDebitDetailsWindow.policyDoesNotExist().isDisplayed() ;
-            ExtentCucumberAdapter.getCurrentStep().fail("The policy was not found");
-            takeScreenshot();
-            Log.error("Policy was not found");
-            //This retries to find the policy in case of a not found error
-            if(retry_count>Constants.STEP_RETRY){
-                findThePolicy();
-                retry_count++;
+            try {
+
+                specificDebitDetailsWindow.policyDoesNotExist().isDisplayed() ;
+                ExtentCucumberAdapter.getCurrentStep().fail("The policy was not found");
+                takeScreenshot();
+
+                Log.error("Policy was not found");
+                //This retries to find the policy in case of a not found error
+                if(retry_count>Constants.STEP_RETRY){
+                    findThePolicy();
+                    retry_count++;
+                }
+
+
+            }catch (NoSuchElementException e){
+                retry_count = 0;
+
+                ExtentCucumberAdapter.getCurrentStep().pass("The policy has been selected successfully");
+
+            }
+            Log.info(policyTableObject.getUniquePolicyNumber());
             }
 
-
-        }catch (NoSuchElementException e){
-            retry_count = 0;
-
-            ExtentCucumberAdapter.getCurrentStep().pass("The policy has been selected successfully");
-
-        }
-        Log.info(policyTableObject.getUniquePolicyNumber());
-        }
         else{// Test if mobility can differentiate if the policy is not registered
             try {
-                sleep(3000L);
-            } catch (InterruptedException e) {
+                sleep(3000);
+            }
+            catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             //policy
@@ -331,13 +335,17 @@ public class StepDefinition {
                 // Execute JavaScript code to click the button
                 JavascriptExecutor js = (JavascriptExecutor) driver;
                 js.executeScript("document.querySelector(\"button[class='swal2-confirm btn btn-info swal2-styled']\").click();");
-
+                sleep(2000);
                 specificDebitDetailsWindow.getSearchUniquePolicy().clear();
                 specificDebitDetailsWindow.SearchForUniquePolicy(uniqueText);
+
             }catch (NoSuchElementException e){
+
                 ExtentCucumberAdapter.getCurrentStep().fail("The Policy not found Dialog is not popping up");
                 takeScreenshot();
 
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
 
         }

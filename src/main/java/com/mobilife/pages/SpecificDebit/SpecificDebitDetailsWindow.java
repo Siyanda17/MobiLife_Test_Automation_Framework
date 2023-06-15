@@ -11,6 +11,7 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 
@@ -410,7 +411,13 @@ public class SpecificDebitDetailsWindow {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         String script = "return window.getComputedStyle(arguments[0], '::before').content;";
         String contentValue = (String) js.executeScript(script, submittedCheckbox);
-        return contentValue.equals("\\f046");
+        String expectedSymbol = "\"\uF046\"";
+        Log.info(contentValue);
+        Log.info("");
+        Log.info(expectedSymbol);
+        //Check Symbol
+        return contentValue.equals(expectedSymbol);
+
     }
 
     /**
