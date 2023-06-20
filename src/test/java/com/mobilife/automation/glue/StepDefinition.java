@@ -97,8 +97,8 @@ public class StepDefinition {
         loginPage = new LoginPage();
         specificDebitPage = new SpecificDebitPage();
         specificDebitDetailsWindow = new SpecificDebitDetailsWindow();
-        specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,policy);
-        policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,policy);
+      //  specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,policy);
+
         Log.info(scenarioName+" : Initialize Objects");
         //extent = new ExtentReports();
         //Can have more than one report attached
@@ -123,6 +123,13 @@ public class StepDefinition {
 //                .assignCategory("Specific Debit Regression").assignDevice(configurationProperties.getBrowser());
 
         driver = DriverSingleton.getDriver();
+        if(scenarioName.equals("Add Specific Debit without filling in fields")){
+            specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,Constants.testPolicy.get(1));
+            policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,Constants.testPolicy.get(1));
+        }else {
+            specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,Constants.testPolicy.get(0));
+            policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,Constants.testPolicy.get(0));
+        }
 //
 //        if (scenarioName.equals("Delete Specific Debit")) {
 //            specificDebitDetailsWindow.getCancelBtn().click();
@@ -161,7 +168,7 @@ public class StepDefinition {
             WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(15));
             wait.until(ExpectedConditions.alertIsPresent());
             ExtentCucumberAdapter.getCurrentStep().fail("incorrect details");
-            Utils.takeScreenshot(scenario);
+           takeScreenshot();
         }catch (TimeoutException e){
             Log.info("Correct Details");
 
@@ -184,7 +191,7 @@ public class StepDefinition {
 
             ExtentCucumberAdapter.getCurrentStep().fail("Hasn't Authenticated");
 
-            Utils.takeScreenshot(scenario);
+            takeScreenshot();
             Log.error("not Authenticated");
         }
 
@@ -263,17 +270,22 @@ public class StepDefinition {
         }
         // specificDebitDetailsWindow.SearchForUniquePolicy("P0054805802LA1");
         //Check if Window Appeared
-        if(specificDebitDetailsWindow.getSpecificDebitDetailsWindow().isDisplayed()){
+        try{
+            specificDebitDetailsWindow.getSpecificDebitDetailsWindow().isDisplayed();
             ExtentCucumberAdapter.getCurrentStep().pass("Specific Debit Details window is appearing");
-        }else {
+        }catch (AssertionError e){
+            takeScreenshot();
             ExtentCucumberAdapter.getCurrentStep().fail("Specific Debit Details window is not appearing");
-            Utils.takeScreenshot(scenario);
+            Log.error("Specific Debit Details window is not appearing");
         }
+
+
 
     }
 
     @Then("Find the policy")
     public void findThePolicy () {
+        //To be Refactored
         String uniqueText = "P0054805802LA1";
         if(!scenarioName.equals("Add Specific Debit without filling in fields")){
             try {
@@ -327,22 +339,24 @@ public class StepDefinition {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-
+            //Validate
             try{
                 specificDebitDetailsWindow.policyDoesNotExist().isDisplayed() ;
                 ExtentCucumberAdapter.getCurrentStep().pass("The Policy not found Dialog pops up");
-
+                Log.info("The Policy not found Dialog pops up");
                 // Execute JavaScript code to click the button
                 JavascriptExecutor js = (JavascriptExecutor) driver;
                 js.executeScript("document.querySelector(\"button[class='swal2-confirm btn btn-info swal2-styled']\").click();");
                 sleep(2000);
                 specificDebitDetailsWindow.getSearchUniquePolicy().clear();
-                specificDebitDetailsWindow.SearchForUniquePolicy(uniqueText);
+                specificDebitDetailsWindow.SearchForUniquePolicy("P0057609002L01");
 
             }catch (NoSuchElementException e){
 
-                ExtentCucumberAdapter.getCurrentStep().fail("The Policy not found Dialog is not popping up");
                 takeScreenshot();
+                ExtentCucumberAdapter.getCurrentStep().fail("The Policy not found Dialog is not popping up");
+                Log.error("The Policy not found Dialog is not popping up");
+
 
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -509,11 +523,17 @@ public class StepDefinition {
     @And("Matches the current Nett Premium")
     public void matchesTheCurrentNettPremium () {
         Double actual = Double.parseDouble(specificDebitDetailsWindow.getAmount());
-        Double expected = specificDebitTableObject.get(0).getPolicyAmount();
+       // int lastIndex = specificDebitTableObject.size()-1;
+        Double expected = policyTableObject.getNettPremium();
+
         try {
             assertEquals(expected,actual);
+            ExtentCucumberAdapter.getCurrentStep().pass("The Amounts match even the cents");
         }catch (AssertionError e){
+            takeScreenshot();
             ExtentCucumberAdapter.getCurrentStep().fail("The Nett Premium does not match the policy on the database");
+            Log.error(expected +" Does not match "+ actual);
+            Log.error("The Nett Premium does not match the policy on the database");
         }
 
     }
@@ -521,7 +541,13 @@ public class StepDefinition {
     @And("Nett Premium cannot be negative")
     public void nettPremiumCannotBeNegative () {
         specificDebitDetailsWindow.setPolicyAmount("-");
-        assertFalse(specificDebitDetailsWindow.getPremiumMonth().getAttribute("value").contains("-"));
+        try {
+            assertFalse(specificDebitDetailsWindow.getPremiumMonth().getAttribute("value").contains("-"));
+        }catch (AssertionError e){
+            takeScreenshot();
+            ExtentCucumberAdapter.getCurrentStep().fail("The amount textbox should not allow negative input");
+        }
+
     }
 
     @Then("Enter a Weekend Action Date and in the past")
@@ -617,7 +643,11 @@ public class StepDefinition {
                 JavascriptExecutor js = (JavascriptExecutor) driver;
                 js.executeScript("document.querySelector(\"div.swal2-actions > button.swal2-confirm.btn.btn-primary\").click();");
 
-                specificDebitDetailsWindow.ChoosePremiumMonth("Jun");
+                Random random = new Random();
+                int randomNumber = random.nextInt(12) + 1;
+                specificDebitDetailsWindow.ChoosePremiumMonth(SpecificDebitDetailsWindow.fromNumToMonth(randomNumber));
+                //Saves the Specific Debit with the new value
+               clickSave();
             }
 
             // specificDebitDetailsWindow.getDuplicatePopUpBtn().click();
@@ -754,6 +784,7 @@ public class StepDefinition {
     public void allowEditSpecificDebitBeforeSubmission () {
 
         specificDebitPage.searchSpecificDebit("P0054805802LA1");
+
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
@@ -761,10 +792,26 @@ public class StepDefinition {
         }
 
         specificDebitPage.getLatestSpecificDebit();
+
         try {
+
             Thread.sleep(2000);
+
         } catch (InterruptedException e) {
+
             throw new RuntimeException(e);
+        }
+
+        try{
+
+            assertTrue(specificDebitDetailsWindow.isSaveButtonVisible());
+            assertTrue(specificDebitDetailsWindow.isDeleteButtonVisible());
+            ExtentCucumberAdapter.getCurrentStep().pass("We are able to Edit a Specific Debit before Submission");
+
+        }catch (AssertionError e){
+
+            ExtentCucumberAdapter.getCurrentStep().fail("The Delete and Save button are not visible");
+            takeScreenshot();
         }
 
         specificDebitDetailsWindow.ChoosePremiumMonth("Jun");
@@ -809,7 +856,7 @@ public class StepDefinition {
                     "                    FROM SpecificDebit\n" +
                     "                    WHERE Policy = ?\n" +
                     "            \n" +
-                    "            )",specificDebitRowMapper,policy);
+                    "            )",specificDebitRowMapper,Constants.testPolicy.get(0));
 
             Thread.sleep(5L);
         } catch (InterruptedException e) {
@@ -838,7 +885,23 @@ public class StepDefinition {
         }
         //String month = specificDebitDetailsWindow.getPremiumMonth().getAttribute("value");
         specificDebitDetailsWindow.ChoosePremiumMonth("Aug");
-      assertFalse(specificDebitDetailsWindow.isSaveButtonVisible());
+        try{
+            assertTrue(specificDebitDetailsWindow.isThereASubmittedCheckMark());
+        }catch (AssertionError e){
+            takeScreenshot();
+            ExtentCucumberAdapter.getCurrentStep().fail("This Policy has not been submitted");
+            Log.error("This Policy has not been submitted");
+        }
+        try{
+            assertFalse(specificDebitDetailsWindow.isSaveButtonVisible());
+            ExtentCucumberAdapter.getCurrentStep().pass("Save Button Does not appear");
+        }catch (AssertionError e){
+
+            takeScreenshot();
+            ExtentCucumberAdapter.getCurrentStep().fail("The Save Button is Appearing ");
+            Log.info("The Save Button is Appearing ");
+        }
+
     }
     @Then("Submitted checkbox ticked after the linked collection item is submitted")
     public void submittedCheckboxTickedAfterTheLinkedCollectionItemIsSubmitted () {//More Code to be added (Database Validation)

@@ -1,6 +1,11 @@
 package com.mobilife.Utilities;
 
 
+import org.openqa.selenium.WebDriver;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents the Constant on the Framework
  *
@@ -29,4 +34,16 @@ public class Constants {
     public static final String DATABASE_HOST = "databaseHost";
     public static final String DATABASE_USER = "databaseUsername";
     public static final String DATABASE_PASS = "databasePassword";
+    //For Testing specific Debits
+    public static List<Integer> testPolicy ;
+    static {
+        // Initialize the static list
+        testPolicy = new ArrayList<>();
+        //P0054805802LA1
+        testPolicy.add(152738);
+        //P0057609002L01
+        testPolicy.add(108603);
+        //TMA93827
+        testPolicy.add(763563);
+    }
 }

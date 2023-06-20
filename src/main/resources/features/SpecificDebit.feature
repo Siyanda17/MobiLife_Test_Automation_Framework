@@ -24,6 +24,7 @@ Feature: Specific Debit
     And Find the policy
     Then the policy is "Selected"
     And Buttons "Save" and "Cancel" Appear an the bottom
+    And Matches the current Nett Premium
     And Click Save
     Then Error message will show below the empty textboxes
 

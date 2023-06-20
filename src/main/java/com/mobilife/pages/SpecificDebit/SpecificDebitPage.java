@@ -51,7 +51,8 @@ public class SpecificDebitPage {
      *
      * */
     public void searchSpecificDebit(String policy){
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10L));
+        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOf(searchBox));
         searchBox.sendKeys(policy);
         searchBox.sendKeys(Keys.ENTER);
     }
