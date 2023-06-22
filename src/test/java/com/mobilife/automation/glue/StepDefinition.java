@@ -1,16 +1,14 @@
 package com.mobilife.automation.glue;
 
-import com.aventstack.extentreports.ExtentReports;
-import com.aventstack.extentreports.ExtentTest;
+
 import com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter;
-import com.aventstack.extentreports.reporter.ExtentSparkReporter;
-import com.mobilife.Connect.Connector;
+
 import com.mobilife.Connect.Tables.Policy.PolicyRowMapper;
 import com.mobilife.Connect.Tables.Policy.PolicyTable;
 import com.mobilife.Utilities.Log;
 import com.mobilife.Utilities.Utils;
+
 import io.cucumber.java.After;
-import io.cucumber.java.AfterStep;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import io.cucumber.java.en.And;
@@ -18,6 +16,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
+
 import com.mobilife.Config.AutomationFrameworkConfiguration;
 import com.mobilife.Connect.Tables.SpecificDebit.*;
 import com.mobilife.Driver.DriverSingleton;
@@ -27,13 +26,16 @@ import com.mobilife.pages.LoginPage.LoginPage;
 import com.mobilife.pages.MainPage.MainPage;
 import com.mobilife.pages.SpecificDebit.SpecificDebitDetailsWindow;
 import com.mobilife.pages.SpecificDebit.SpecificDebitPage;
-import org.checkerframework.checker.units.qual.A;
+
+
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
@@ -46,8 +48,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
 
-import static java.lang.System.in;
-import static java.lang.System.out;
 import static java.lang.Thread.sleep;
 import static junit.framework.TestCase.*;
 
@@ -345,6 +345,7 @@ public class StepDefinition {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+
             //Validate
             try{
                 specificDebitDetailsWindow.policyDoesNotExist().isDisplayed() ;
@@ -681,19 +682,24 @@ public class StepDefinition {
         }
     }
 
+    /**
+     * Takes Screenshot when called
+     * */
+
     private void takeScreenshot(){
         Utils.takeScreenshot(scenario);
     }
 
     @And("If it's after {string} Mobility will show an error text")
     public void ifItSAfterMobilityWillShowAnErrorText (String arg0) {
+
         LocalTime cutOffTime = LocalTime.of(Integer.parseInt(arg0.substring(0,2)), Integer.parseInt(arg0.substring(3,5)));
-        out.println(arg0.substring(0,2)+arg0.substring(3,5));
         String inputDate = specificDebitDetailsWindow.
                 getActionDate().
                 getAttribute("value");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate date = LocalDate.parse(inputDate, formatter);
+
         //If Ran after 14:30 catch the error label
         if(LocalTime.now().isAfter(cutOffTime) &&
                         date.equals(LocalDate.now())){//Get the Error Text
@@ -703,6 +709,7 @@ public class StepDefinition {
                     .pollingEvery(Duration.ofSeconds(2L))
                     .ignoring(NoSuchElementException.class,TimeoutException.class);
             fluentWait.until(ExpectedConditions.visibilityOf(specificDebitDetailsWindow.getErrorTextUnderActionDate()));
+
             //Implement after 14:30
             String expected = "Cutoff time is 14:30 - Please choose tomorrow or later";
             String actualText = specificDebitDetailsWindow.getErrorTextUnderActionDate().getText();
@@ -711,7 +718,9 @@ public class StepDefinition {
                 assertEquals(expected,actualText);
                 assertTrue("Error text",specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());
                 ExtentCucumberAdapter.getCurrentStep().pass("the error for cutoff time is showing");
+
             }catch (AssertionError e){
+
                 ExtentCucumberAdapter.getCurrentStep().fail("The Cutoff time error is not showing");
                 takeScreenshot();
             }
@@ -743,9 +752,13 @@ public class StepDefinition {
                 //Checks if Error is Appearing
                 assertTrue(specificDebitDetailsWindow.getErrorTextUnderPremiumMonth().isDisplayed());
                 ExtentCucumberAdapter.getCurrentStep().pass("Error Under Premium month is appearing as expected");
-            }catch (AssertionError|NoSuchElementException e){
+
+            }
+            catch (AssertionError|NoSuchElementException e){
+
                 takeScreenshot();
                 ExtentCucumberAdapter.getCurrentStep().fail("Error Under Premium month is not appearing");
+
             }
 
         }
@@ -757,33 +770,54 @@ public class StepDefinition {
                 throw new RuntimeException(e);
             }
             try {
+
                 //Checks if Error is Appearing
                 assertTrue(specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());
                 ExtentCucumberAdapter.getCurrentStep().pass("Error Under Premium month is appearing as expected");
-            }catch (AssertionError|NoSuchElementException e){
+
+            }
+            catch (AssertionError|NoSuchElementException e){
+
                 takeScreenshot();
                 ExtentCucumberAdapter.getCurrentStep().fail("Error Under Premium month is not appearing");
+
             }
         }
     }
 
     @When("Submitted checkbox empty\\(no tick) before the linked collection item is Submitted")
     public void submittedCheckboxEmptyNoTickBeforeTheLinkedCollectionItemIsSubmitted () {
-        assertFalse(specificDebitDetailsWindow.isThereASubmittedCheckMark());
+        try{
+            assertFalse(specificDebitDetailsWindow.isThereASubmittedCheckMark());
+            Log.info("No tick");
+
+        }
+        catch (AssertionError e){
+            takeScreenshot();
+            ExtentCucumberAdapter.getCurrentStep().fail("The Checkbox is not supposed to appear before Submission");
+
+
+        }
+
         //Check if value from contentValue is the desired
 
     }
 
     @And("Cannot tick Submitted checkbox")
     public void cannotTickSubmittedCheckbox () {
+        //Checks if the Submitted button is enabled
         try {
+
             assertFalse(specificDebitDetailsWindow.getSubmittedBtn().isEnabled());
             ExtentCucumberAdapter.getCurrentStep().pass("The Submit Button is disabled as expected");
-        }catch (AssertionError|NoSuchElementException e){
+        }
+        catch (AssertionError|NoSuchElementException e){
+
             takeScreenshot();
             specificDebitDetailsWindow.getSubmittedBtn().click();
             ExtentCucumberAdapter.getCurrentStep().fail("The Submit Button should not be enabled");
             Log.error(e.getMessage());
+
         }
 
     }
@@ -970,15 +1004,24 @@ public class StepDefinition {
 
     @When("Adding for inactive contract payment status")
     public void addingForInactiveContractPaymentStatus () {
-        // Define the SQL statement
-        String sql = "UPDATE Policy SET ContractPaymentStatus = 'INACTIVE' WHERE Id = ?";
+        try {
+            // Define the SQL statement
+            String sql = "UPDATE Policy SET ContractPaymentStatus = 'INACTIVE', ContractPaymentStatusReason = 'Bank Rejection' WHERE Id = ?";
 
-// Execute the update statement
-        int rowsAffected = jdbcTemplatePolicy.update(sql, Constants.testPolicy.get(1));
-        Log.info(String.valueOf(rowsAffected));
-        refreshPolicyObject(Constants.testPolicy.get(1));
-        Log.info(policyTableObject.getUniquePolicyNumber());
-        Log.info(policyTableObject.getContractPaymentStatus());
+            // Execute the update statement
+            int rowsAffected = jdbcTemplatePolicy.update(sql, Constants.testPolicy.get(1));
+            Log.info(String.valueOf(rowsAffected));
+
+            refreshPolicyObject(Constants.testPolicy.get(1));
+
+            Log.info(policyTableObject.getUniquePolicyNumber());
+            ExtentCucumberAdapter.getCurrentStep().pass("The Contract Payment Status has been successfully updated to \"INACTIVE\"");
+
+            Log.info(policyTableObject.getContractPaymentStatus());
+
+        } catch (DataAccessException e){
+            ExtentCucumberAdapter.getCurrentStep().fail("Couldn't Update the policy Contract Payment Status to \"INACTIVE\" ");
+        }
 
     }
 
@@ -989,9 +1032,20 @@ public class StepDefinition {
     @Then("client contract payment status updates to {string} and contract payment status reason to {string}")
     public void clientContractPaymentStatusUpdatesToActiveAndContractPaymentStatusReasonToClientRequested (String contractPaymentStatus, String contractPaymentStatusReason) {
         refreshPolicyObject(Constants.testPolicy.get(1));
-        assertEquals(contractPaymentStatus.toLowerCase(), policyTableObject.getContractPaymentStatus().toLowerCase());
-        Log.info(policyTableObject.getContractPaymentStatus());
-        assertEquals(contractPaymentStatusReason, policyTableObject.getContractPaymentStatusReason());
+        //Validate CPS
+        try{
+            assertEquals(contractPaymentStatus.toLowerCase(), policyTableObject.getContractPaymentStatus().toLowerCase());
+            Log.info(policyTableObject.getContractPaymentStatus());
+        }catch (AssertionError e){
+            ExtentCucumberAdapter.getCurrentStep().fail("Contract Payment Status didn't change to \"ACTIVE\" ");
+        }
+        //Validate CPSR
+        try{
+            assertEquals(contractPaymentStatusReason, policyTableObject.getContractPaymentStatusReason());
+        }catch(AssertionError e){
+            ExtentCucumberAdapter.getCurrentStep().fail("Contract Payment Status didn't change to \"ACTIVE\"");
+        }
+
 
 
     }
