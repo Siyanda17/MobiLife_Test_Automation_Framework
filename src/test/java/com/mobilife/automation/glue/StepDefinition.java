@@ -4,6 +4,7 @@ import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+import com.mobilife.Connect.Connector;
 import com.mobilife.Connect.Tables.Policy.PolicyRowMapper;
 import com.mobilife.Connect.Tables.Policy.PolicyTable;
 import com.mobilife.Utilities.Log;
@@ -92,7 +93,6 @@ public class StepDefinition {
     @Before(order = 1)
     public void initializeObjects(){
         DriverSingleton.getInstance(configurationProperties.getBrowser());
-        int policy = 152738;
         mainPage = new MainPage();
         loginPage = new LoginPage();
         specificDebitPage = new SpecificDebitPage();
@@ -100,9 +100,7 @@ public class StepDefinition {
       //  specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,policy);
 
         Log.info(scenarioName+" : Initialize Objects");
-        //extent = new ExtentReports();
-        //Can have more than one report attached
-       // extent.attachReporter(spark);
+
 
 
     }
@@ -111,24 +109,29 @@ public class StepDefinition {
      * */
     @Before(order = 2)
     public void setUp(Scenario scenario){
+
         this.scenario = scenario;
         scenarioName = scenario.getName();
 
         Log.getLogData(Log.class.getName());
         Log.startTest(scenarioName);
-      //  test = ExtentCucumberAdapter.getCurrentScenario();
-        scenario.log(scenarioName);
 
-//        test = extent.createTest(scenarioName).assignAuthor("Yakhuxolo Mxabo")
-//                .assignCategory("Specific Debit Regression").assignDevice(configurationProperties.getBrowser());
+        scenario.log(scenarioName);
 
         driver = DriverSingleton.getDriver();
         if(scenarioName.equals("Add Specific Debit without filling in fields")){
-            specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,Constants.testPolicy.get(1));
-            policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,Constants.testPolicy.get(1));
-        }else {
+
             specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,Constants.testPolicy.get(0));
+            Log.info("Print Here");
             policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,Constants.testPolicy.get(0));
+            Log.info("Print Here");
+            Log.info(policyTableObject.getUniquePolicyNumber());
+        }else {
+
+            specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,Constants.testPolicy.get(1));
+
+            policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,Constants.testPolicy.get(1));
+
         }
 //
 //        if (scenarioName.equals("Delete Specific Debit")) {
@@ -286,8 +289,10 @@ public class StepDefinition {
     @Then("Find the policy")
     public void findThePolicy () {
         //To be Refactored
-        String uniqueText = "P0054805802LA1";
+        String uniqueText = "P0057609002L01";
+        //if not
         if(!scenarioName.equals("Add Specific Debit without filling in fields")){
+            refreshPolicyObject(Constants.testPolicy.get(1));
             try {
                 sleep(3000);
             } catch (InterruptedException e) {
@@ -326,6 +331,7 @@ public class StepDefinition {
             }
 
         else{// Test if mobility can differentiate if the policy is not registered
+            refreshPolicyObject(Constants.testPolicy.get(0));
             try {
                 sleep(3000);
             }
@@ -344,12 +350,14 @@ public class StepDefinition {
                 specificDebitDetailsWindow.policyDoesNotExist().isDisplayed() ;
                 ExtentCucumberAdapter.getCurrentStep().pass("The Policy not found Dialog pops up");
                 Log.info("The Policy not found Dialog pops up");
+
                 // Execute JavaScript code to click the button
                 JavascriptExecutor js = (JavascriptExecutor) driver;
                 js.executeScript("document.querySelector(\"button[class='swal2-confirm btn btn-info swal2-styled']\").click();");
                 sleep(2000);
+
                 specificDebitDetailsWindow.getSearchUniquePolicy().clear();
-                specificDebitDetailsWindow.SearchForUniquePolicy("P0057609002L01");
+                specificDebitDetailsWindow.SearchForUniquePolicy("TMA134FF0");
 
             }catch (NoSuchElementException e){
 
@@ -479,7 +487,7 @@ public class StepDefinition {
     @And("Premium Month date picker translates to MM\\/YY")
     public void premiumMonthDatePickerTranslatesToMMYY () {
 
-        for(int i = 1;i < 7;i++){
+        for(int i = 1;i < 4;i++){
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -522,8 +530,13 @@ public class StepDefinition {
 
     @And("Matches the current Nett Premium")
     public void matchesTheCurrentNettPremium () {
+//        if (scenarioName.equals("Add Specific Debit without filling in fields")){
+//            refreshPolicyObject(Constants.testPolicy.get(0));
+//        }
         Double actual = Double.parseDouble(specificDebitDetailsWindow.getAmount());
        // int lastIndex = specificDebitTableObject.size()-1;
+        Log.info(String.valueOf(policyTableObject.getNettPremium()));
+        assert policyTableObject != null;
         Double expected = policyTableObject.getNettPremium();
 
         try {
@@ -549,6 +562,7 @@ public class StepDefinition {
         }
 
     }
+
 
     @Then("Enter a Weekend Action Date and in the past")
     public void enterAWeekendActionDateAndInThePast () {
@@ -683,6 +697,7 @@ public class StepDefinition {
         //If Ran after 14:30 catch the error label
         if(LocalTime.now().isAfter(cutOffTime) &&
                         date.equals(LocalDate.now())){//Get the Error Text
+            specificDebitDetailsWindow.saveSpecificDebit();
             Wait<WebDriver> fluentWait = new FluentWait<>(driver)
                     .withTimeout(Duration.ofSeconds(5L))
                     .pollingEvery(Duration.ofSeconds(2L))
@@ -691,6 +706,7 @@ public class StepDefinition {
             //Implement after 14:30
             String expected = "Cutoff time is 14:30 - Please choose tomorrow or later";
             String actualText = specificDebitDetailsWindow.getErrorTextUnderActionDate().getText();
+
             try {
                 assertEquals(expected,actualText);
                 assertTrue("Error text",specificDebitDetailsWindow.getErrorTextUnderActionDate().isDisplayed());
@@ -783,7 +799,7 @@ public class StepDefinition {
     @When("Allow Edit Specific Debit before Submission")
     public void allowEditSpecificDebitBeforeSubmission () {
 
-        specificDebitPage.searchSpecificDebit("P0054805802LA1");
+        specificDebitPage.searchSpecificDebit("P0057609002L01");
 
         try {
             Thread.sleep(2000);
@@ -846,7 +862,6 @@ public class StepDefinition {
     public void deletingASpecificDebitTheDeletedColumnInTheDatabaseTableGetsPopulated (String arg0) {
 
         driver.get(Constants.SPECIFICDEBIT_URL);
-        int policy = 152738;
         try {
             Thread.sleep(5L);
             specificDebitTableObject = jdbcTemplate.query("SELECT *\n" +
@@ -856,7 +871,7 @@ public class StepDefinition {
                     "                    FROM SpecificDebit\n" +
                     "                    WHERE Policy = ?\n" +
                     "            \n" +
-                    "            )",specificDebitRowMapper,Constants.testPolicy.get(0));
+                    "            )",specificDebitRowMapper,Constants.testPolicy.get(1));
 
             Thread.sleep(5L);
         } catch (InterruptedException e) {
@@ -870,7 +885,7 @@ public class StepDefinition {
     public void denyEditSpecificDebitAfterSubmission () {
         //driver.get(Constants.SPECIFICDEBIT_URL);
         //Has Submitted specific debits
-        specificDebitPage.searchSpecificDebit("P0057609002L01");
+        specificDebitPage.searchSpecificDebit("P0040735302P01");
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
@@ -955,10 +970,30 @@ public class StepDefinition {
 
     @When("Adding for inactive contract payment status")
     public void addingForInactiveContractPaymentStatus () {
+        // Define the SQL statement
+        String sql = "UPDATE Policy SET ContractPaymentStatus = 'INACTIVE' WHERE Id = ?";
+
+// Execute the update statement
+        int rowsAffected = jdbcTemplatePolicy.update(sql, Constants.testPolicy.get(1));
+        Log.info(String.valueOf(rowsAffected));
+        refreshPolicyObject(Constants.testPolicy.get(1));
+        Log.info(policyTableObject.getUniquePolicyNumber());
+        Log.info(policyTableObject.getContractPaymentStatus());
+
     }
 
+    void refreshPolicyObject(int id)
+    {
+        policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,id);
+    }
     @Then("client contract payment status updates to {string} and contract payment status reason to {string}")
-    public void clientContractPaymentStatusUpdatesToActiveAndContractPaymentStatusReasonToClientRequested () {
+    public void clientContractPaymentStatusUpdatesToActiveAndContractPaymentStatusReasonToClientRequested (String contractPaymentStatus, String contractPaymentStatusReason) {
+        refreshPolicyObject(Constants.testPolicy.get(1));
+        assertEquals(contractPaymentStatus.toLowerCase(), policyTableObject.getContractPaymentStatus().toLowerCase());
+        Log.info(policyTableObject.getContractPaymentStatus());
+        assertEquals(contractPaymentStatusReason, policyTableObject.getContractPaymentStatusReason());
+
+
     }
 
 

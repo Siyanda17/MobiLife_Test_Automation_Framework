@@ -44,6 +44,14 @@ Feature: Specific Debit
     And Can add notes
 
 
+      #Add specific debit for policy with inactive contract payment Status
+  @Done
+  Scenario:  Add Specific Debit for inactive CPS
+    When Adding for inactive contract payment status
+
+
+
+
   @Done
     @SuccessfulScenario
     Scenario: Add Specific Debit
@@ -61,6 +69,7 @@ Feature: Specific Debit
       #If it after 14:30  Mobility will not allow to create for today
       Then  Enter Action Date
       Then Click Save
+      Then client contract payment status updates to 'active' and contract payment status reason to 'Client requested'
 
 
 
@@ -74,12 +83,6 @@ Feature: Specific Debit
       And  Deny Edit Specific Debit after Submission
       Then Submitted checkbox ticked after the linked collection item is submitted
       Then  Cannot delete a specific debit after it has been submitted
-
-      #Add specific debit for policy with inactive contract payment Status
-
-      Scenario:  Add Specific Debit for inactive CPS
-        When Adding for inactive contract payment status
-        Then client contract payment status updates to 'active' and contract payment status reason to 'Client requested'
 
 
 

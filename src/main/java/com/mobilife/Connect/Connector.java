@@ -1,8 +1,6 @@
 package com.mobilife.Connect;
 
-import com.mobilife.Driver.DriverSingleton;
 import com.mobilife.Utilities.ConfigurationProperties;
-import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,6 +52,11 @@ public class Connector {
     @Bean
     public JdbcTemplate jdbcTemplate() {
         return new JdbcTemplate(dataSource());
+    }
+
+    public static void updateContractPaymentStatus(int id, String contractPaymentStatus, JdbcTemplate jdbcTemplate) {
+        String sql = "UPDATE Policy SET ContractPaymentStatus = 'INACTIVE' WHERE Id = ?";
+        jdbcTemplate.update(sql, contractPaymentStatus, id);
     }
 //    @Bean
 //    public DriverSingleton driverSingleton(){

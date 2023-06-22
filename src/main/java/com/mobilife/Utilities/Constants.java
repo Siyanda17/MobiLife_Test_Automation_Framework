@@ -39,8 +39,8 @@ public class Constants {
     static {
         // Initialize the static list
         testPolicy = new ArrayList<>();
-        //P0054805802LA1
-        testPolicy.add(152738);
+        //TMA134FF0
+        testPolicy.add(1467372);
         //P0057609002L01
         testPolicy.add(108603);
         //TMA93827
