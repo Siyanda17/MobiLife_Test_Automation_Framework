@@ -14,34 +14,44 @@ Feature: Specific Debit
     Then I should be redirected to the homepage
     And see a welcome message with my "Welcome"
 
+    @Done
+    Scenario: Go to Specific Debit
+      Given I am on Specific Debit Tab
 
       #Detect Duplicate Specific Debits
   @Done
-  Scenario: Add Specific Debit without filling in fields
-    Given I am on Specific Debit Tab
+  Scenario Outline: Add Specific Debit without filling in fields
+
     When  I Add a Specific Debit
     Then Specific Debit Details window appears
-    And Find the policy
+    And Find the policy "<uniquePolicyNumber>" "<policyId>"
     Then the policy is "Selected"
     And Buttons "Save" and "Cancel" Appear an the bottom
     And Matches the current Nett Premium
     And Click Save
     Then Error message will show below the empty textboxes
-
-
-  @Done
-  Scenario: Action Date
-      # Action date cannot be in the past(Past dates on the date picker are greyed out)
+     # Action date cannot be in the past(Past dates on the date picker are greyed out)
       # Action date should not be a non collection day(weekend days and holidays should be greyed out)
     Then Enter a Weekend Action Date and in the past
     Then Enter Action Date
     And If it's after "14:30" Mobility will show an error text
+    Examples:
+      | policyId | uniquePolicyNumber |
+      | 1467372  | TMA134FF0          |
+      | 108603   | P0057609002L01     |
+      | 1576942  | LFA00004           |
+      | 5249709  | NFA00523           |
+
+
+
+
+
 
   @Done
   Scenario: Check Submitted
     When  Submitted checkbox empty(no tick) before the linked collection item is Submitted
     And Cannot tick Submitted checkbox
-    And Can add notes
+
 
 
       #Add specific debit for policy with inactive contract payment Status
@@ -57,7 +67,7 @@ Feature: Specific Debit
     Scenario: Add Specific Debit
       When I Add a Specific Debit
       Then Specific Debit Details window appears
-      Then Find the policy
+      Then Find the policy "<uniquePolicyNumber>" "<policyId>"
       Then the policy is "Selected"
       Then Policy number filed is populated
       And Policy number is uneditable
@@ -68,6 +78,7 @@ Feature: Specific Debit
       And Nett Premium cannot be negative
       #If it after 14:30  Mobility will not allow to create for today
       Then  Enter Action Date
+      And Can add notes
       Then Click Save
       Then client contract payment status updates to 'active' and contract payment status reason to 'Client requested'
 

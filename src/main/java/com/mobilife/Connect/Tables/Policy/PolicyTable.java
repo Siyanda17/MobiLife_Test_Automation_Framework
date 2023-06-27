@@ -108,13 +108,14 @@ public class PolicyTable {
         this.anniversaryDate = anniversaryDate;
     }
 
+    public void setUniquePolicyNumber (String uniquePolicyNumber) {
+        this.uniquePolicyNumber = uniquePolicyNumber;
+    }
+
     public String getUniquePolicyNumber () {
         return uniquePolicyNumber;
     }
 
-    public void setUniquePolicyNumber (String uniquePolicyNumber) {
-        this.uniquePolicyNumber = uniquePolicyNumber;
-    }
 
     public Long getIndividualId () {
         return individualId;
