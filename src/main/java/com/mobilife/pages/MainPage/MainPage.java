@@ -63,6 +63,9 @@ public class MainPage {
        WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
        wait.until(ExpectedConditions.visibilityOf(policyManagement));
         policyManagement.click();
+
+        wait = new WebDriverWait(driver,Duration.ofSeconds(10L));
+        wait.until(ExpectedConditions.visibilityOf(specificDebit));
         specificDebit.click();
     }
 

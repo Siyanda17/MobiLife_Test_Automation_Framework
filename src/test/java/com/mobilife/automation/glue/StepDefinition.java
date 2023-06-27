@@ -119,20 +119,7 @@ public class StepDefinition {
         scenario.log(scenarioName);
 
         driver = DriverSingleton.getDriver();
-        if(scenarioName.equals("Add Specific Debit without filling in fields")){
 
-            specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,Constants.testPolicy.get(0));
-            Log.info("Print Here");
-            policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,Constants.testPolicy.get(0));
-            Log.info("Print Here");
-            Log.info(policyTableObject.getUniquePolicyNumber());
-        }else {
-
-            specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,Constants.testPolicy.get(1));
-
-            policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,Constants.testPolicy.get(1));
-
-        }
 //
 //        if (scenarioName.equals("Delete Specific Debit")) {
 //            specificDebitDetailsWindow.getCancelBtn().click();
@@ -286,13 +273,23 @@ public class StepDefinition {
 
     }
 
-    @Then("Find the policy")
-    public void findThePolicy () {
+    //user to assert with the database
+    private void databaseTableObjects(String policyId) {
+        specificDebitTableObject = jdbcTemplate.query("SELECT * FROM SpecificDebit Where policy = ?",specificDebitRowMapper,policyId);
+        Log.info("Print Here");
+        policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,policyId);
+        Log.info("Print Here");
+        Log.info(policyTableObject.getUniquePolicyNumber());
+    }
+    @Then("Find the policy {string} {string}")
+    public void findThePolicy (String uniquePolicy, String policyId) {
+
         //To be Refactored
-        String uniqueText = "P0057609002L01";
         //if not
-        if(!scenarioName.equals("Add Specific Debit without filling in fields")){
-            refreshPolicyObject(Constants.testPolicy.get(1));
+        if(scenarioName.equals("Add Specific Debit without filling in fields") && !uniquePolicy.equals("Incorrect Policy")){
+
+            databaseTableObjects(policyId);
+
             try {
                 sleep(3000);
             } catch (InterruptedException e) {
@@ -300,11 +297,11 @@ public class StepDefinition {
                 }
             //Policy
 
-            specificDebitDetailsWindow.SearchForUniquePolicy(uniqueText);
+            specificDebitDetailsWindow.SearchForUniquePolicy(uniquePolicy);
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5L));
 
 
-            assertEquals(uniqueText,policyTableObject.getUniquePolicyNumber());
+            assertEquals(uniquePolicy,policyTableObject.getUniquePolicyNumber());
             ExtentCucumberAdapter.getCurrentStep().pass("Policy Exists on the database");
 
             try {
@@ -315,8 +312,8 @@ public class StepDefinition {
 
                 Log.error("Policy was not found");
                 //This retries to find the policy in case of a not found error
-                if(retry_count>Constants.STEP_RETRY){
-                    findThePolicy();
+                if(retry_count > Constants.STEP_RETRY){
+                    findThePolicy(uniquePolicy,policyId);
                     retry_count++;
                 }
 
@@ -331,13 +328,8 @@ public class StepDefinition {
             }
 
         else{// Test if mobility can differentiate if the policy is not registered
-            refreshPolicyObject(Constants.testPolicy.get(0));
-            try {
-                sleep(3000);
-            }
-            catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+
+
             //policy
             specificDebitDetailsWindow.SearchForUniquePolicy(Constants.INCORRECT_POLICY);
             try {
@@ -348,6 +340,7 @@ public class StepDefinition {
 
             //Validate
             try{
+
                 specificDebitDetailsWindow.policyDoesNotExist().isDisplayed() ;
                 ExtentCucumberAdapter.getCurrentStep().pass("The Policy not found Dialog pops up");
                 Log.info("The Policy not found Dialog pops up");
@@ -358,7 +351,6 @@ public class StepDefinition {
                 sleep(2000);
 
                 specificDebitDetailsWindow.getSearchUniquePolicy().clear();
-                specificDebitDetailsWindow.SearchForUniquePolicy("TMA134FF0");
 
             }catch (NoSuchElementException e){
 
@@ -394,6 +386,7 @@ public class StepDefinition {
     }
     @And("Buttons {string} and {string} Appear an the bottom")
     public void buttonsAndAppearAnTheBottom (String arg0, String arg1) {
+
         try {
             Thread.sleep(2000);
 
@@ -401,14 +394,18 @@ public class StepDefinition {
 
             e.printStackTrace();
         }
+
         //Save Button Validation
         try {
+
             assertTrue(specificDebitDetailsWindow.isSaveButtonVisible());
             Log.info(specificDebitDetailsWindow.getSaveBtn().getText());
             Log.info(arg0);
             assertEquals(arg0,specificDebitDetailsWindow.getSaveBtn().getText());
             ExtentCucumberAdapter.getCurrentStep().pass(arg0+" Button is appearing is Appearing");
+
         }catch (AssertionError|NoSuchElementException e){
+
             takeScreenshot();
             Log.error("Button not showing");
             ExtentCucumberAdapter.getCurrentStep().fail(arg0+" Button is not appearing on the window");
@@ -416,11 +413,13 @@ public class StepDefinition {
         }
         //Cancel Button Validation
         try {
+
             assertTrue(specificDebitDetailsWindow.isCancelButtonVisible());
             assertEquals(arg1,specificDebitDetailsWindow.getCancelBtn().getText());
             ExtentCucumberAdapter.getCurrentStep().pass(arg1+" Button is appearing");
 
         }catch (AssertionError|NoSuchElementException e){
+
             takeScreenshot();
             Log.error("Button not showing");
             ExtentCucumberAdapter.getCurrentStep().fail(arg1+" Button is not appearing on specific debit window");
@@ -430,6 +429,7 @@ public class StepDefinition {
 
     @Then("Policy number filed is populated")
     public void policyNumberFiledIsPopulated () {
+
         try {
             Thread.sleep(2000);
 
@@ -449,8 +449,10 @@ public class StepDefinition {
 
     @And("Policy number is uneditable")
     public void policyNumberIsUneditable () {
+
         //Policy TextBox not enabled
         try {
+
             assertFalse(specificDebitDetailsWindow.isPolicyTextboxEnable());
 
             ExtentCucumberAdapter.getCurrentStep().pass("Policy textbox number is uneditable");
@@ -469,6 +471,7 @@ public class StepDefinition {
 
     @And("Collection Method Should be {string}")
     public void collectionMethodShouldBeSSVS (String args0) {
+
         //Add a try and change method if its DebiCheck
         String actual = specificDebitDetailsWindow.getCollectionMethod().getText().substring(0,4);
         try {
@@ -499,6 +502,7 @@ public class StepDefinition {
         }
 
         specificDebitDetailsWindow.ChoosePremiumMonth("Mar");
+
         try {
 
             assertFalse(specificDebitDetailsWindow.getPremiumMonth().getAttribute("value").isEmpty());
@@ -508,6 +512,7 @@ public class StepDefinition {
            // Utils.takeScreenshot(scenario);
 
         }catch (AssertionError e){
+
             ExtentCucumberAdapter.getCurrentStep().fail("Cannot choose premium month for any months");
 
            // Utils.takeScreenshot(scenario);
@@ -519,12 +524,17 @@ public class StepDefinition {
 
     @And("The Amount is automatically populated")
     public void theAmountIsAutomaticallyPopulated () {
+
         try {
+
             assertFalse("Amount not populated",specificDebitDetailsWindow.getAmount().isBlank());
             ExtentCucumberAdapter.getCurrentStep().pass("The Amount is automatically populated");
+
         }catch (AssertionError e){
+
             ExtentCucumberAdapter.getCurrentStep().fail("The Amount is empty");
             e.printStackTrace();
+
         }
 
     }
@@ -541,13 +551,17 @@ public class StepDefinition {
         Double expected = policyTableObject.getNettPremium();
 
         try {
+
             assertEquals(expected,actual);
             ExtentCucumberAdapter.getCurrentStep().pass("The Amounts match even the cents");
+
         }catch (AssertionError e){
+
             takeScreenshot();
             ExtentCucumberAdapter.getCurrentStep().fail("The Nett Premium does not match the policy on the database");
             Log.error(expected +" Does not match "+ actual);
             Log.error("The Nett Premium does not match the policy on the database");
+
         }
 
     }
@@ -556,8 +570,11 @@ public class StepDefinition {
     public void nettPremiumCannotBeNegative () {
         specificDebitDetailsWindow.setPolicyAmount("-");
         try {
+
             assertFalse(specificDebitDetailsWindow.getPremiumMonth().getAttribute("value").contains("-"));
+
         }catch (AssertionError e){
+
             takeScreenshot();
             ExtentCucumberAdapter.getCurrentStep().fail("The amount textbox should not allow negative input");
         }
@@ -572,10 +589,12 @@ public class StepDefinition {
         long days = 7;
 
         for(long i = 0; i < days;i++){
+
             final LocalDate date1 = date.plusDays(i);
             Log.info(String.valueOf(i));
             Log.info(date.toString());
             Log.info("Day of th week "+date1);
+
             // Check if the day of the week is either Saturday or Sunday
             if (date1.getDayOfWeek() == DayOfWeek.SATURDAY || date1.getDayOfWeek() == DayOfWeek.SUNDAY) {
                 String day = String.format("%02d", date1.getDayOfMonth());
@@ -642,18 +661,26 @@ public class StepDefinition {
         specificDebitDetailsWindow.saveSpecificDebit();
         //I want to change the date if it's a duplicate or its gives some error only when its Successful one
         //Condition changed from not equal to Add Specific Debit without filling in fields
+
         if(scenarioName.equals("Add Specific Debit")){
+
             if(specificDebitDetailsWindow.isDuplicate()) {
+
                 Log.info("is a duplicate");
                 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10),Duration.ofSeconds(2));
                 wait.until(ExpectedConditions.elementToBeClickable(specificDebitDetailsWindow.getDuplicatePopUpBtn()));
+
                 try{
+
                     specificDebitDetailsWindow.getDuplicatePopUp().isDisplayed();
                     ExtentCucumberAdapter.getCurrentStep().pass("The Duplicate Alert Apppears When there is a Duplicate");
+
                 }catch (NoSuchElementException e){
+
                     ExtentCucumberAdapter.getCurrentStep().fail("The Duplicate is not Appearing ");
                     takeScreenshot();
                 }
+
                 // Execute JavaScript code to click the button
                 JavascriptExecutor js = (JavascriptExecutor) driver;
                 js.executeScript("document.querySelector(\"div.swal2-actions > button.swal2-confirm.btn.btn-primary\").click();");
@@ -667,6 +694,7 @@ public class StepDefinition {
 
             // specificDebitDetailsWindow.getDuplicatePopUpBtn().click();
             assertFalse(specificDebitDetailsWindow.isDuplicate());
+
             //If we can't action the date
             if(specificDebitDetailsWindow.theresAnError()){
 
@@ -725,6 +753,9 @@ public class StepDefinition {
                 takeScreenshot();
             }
 
+        }
+        if (scenarioName.equals("Add Specific Debit without filling in fields")){
+            specificDebitDetailsWindow.getCancelBtn().click();
         }
 
 
@@ -908,11 +939,17 @@ public class StepDefinition {
                     "            )",specificDebitRowMapper,Constants.testPolicy.get(1));
 
             Thread.sleep(5L);
+
         } catch (InterruptedException e) {
+
             throw new RuntimeException(e);
+
         }
+
         SpecificDebitTable deletedSpecific = specificDebitTableObject.get(specificDebitTableObject.size()-1);
+
         Log.info(deletedSpecific.getPremiumMonth());
+
         assertEquals(1, deletedSpecific.getDeleted());
     }
     @When("Deny Edit Specific Debit after Submission")
@@ -1012,7 +1049,7 @@ public class StepDefinition {
             int rowsAffected = jdbcTemplatePolicy.update(sql, Constants.testPolicy.get(1));
             Log.info(String.valueOf(rowsAffected));
 
-            refreshPolicyObject(Constants.testPolicy.get(1));
+           // refreshPolicyObject(Constants.testPolicy.get(1));
 
             Log.info(policyTableObject.getUniquePolicyNumber());
             ExtentCucumberAdapter.getCurrentStep().pass("The Contract Payment Status has been successfully updated to \"INACTIVE\"");
@@ -1029,6 +1066,7 @@ public class StepDefinition {
     {
         policyTableObject = jdbcTemplatePolicy.queryForObject("SELECT * FROM Policy Where Id = ?",policyTableRowMapper,id);
     }
+
     @Then("client contract payment status updates to {string} and contract payment status reason to {string}")
     public void clientContractPaymentStatusUpdatesToActiveAndContractPaymentStatusReasonToClientRequested (String contractPaymentStatus, String contractPaymentStatusReason) {
         refreshPolicyObject(Constants.testPolicy.get(1));
@@ -1049,9 +1087,6 @@ public class StepDefinition {
 
 
     }
-
-
-
 
 
     @After(order = 1)
